@@ -27,7 +27,7 @@ export class User {
   email: string;
 
   @Prop({ required: true })
-  adress: string;
+  address: string;
 
   @Prop()
   birthday: Date;

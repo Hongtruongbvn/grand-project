@@ -81,13 +81,13 @@ export default function Register() {
                 onChange={handleChange}
                 required
               />
-              <input
+              {/* <input
                 name="address"
                 type="text"
                 placeholder="Địa chỉ (không bắt buộc)"
                 value={form.address}
                 onChange={handleChange}
-              />
+              /> */}
 
               <motion.button
                 type="submit"

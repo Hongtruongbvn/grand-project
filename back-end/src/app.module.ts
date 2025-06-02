@@ -16,7 +16,7 @@ import { StoryModule } from './story/story.module';
 import { MessageModule } from './message/message.module';
 import { ChatroomModule } from './chatroom/chatroom.module';
 import { MailModule } from './mail/mail.module';
-import { ConfigModule } from '@nestjs/config'; 
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [

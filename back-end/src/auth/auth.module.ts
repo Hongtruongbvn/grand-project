@@ -6,9 +6,13 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { User, UserSchema } from 'src/user/schema/user.schema';
 import { JwtStrategy } from './jwt.strategy';
+import { UserModule } from 'src/user/user.module';
+import { MailModule } from 'src/mail/mail.module';
 
 @Module({
   imports: [
+    UserModule,
+    MailModule,
     JwtModule.register({
       secret: 'super-secret-key', // đổi bằng biến môi trường ENV
       signOptions: { expiresIn: '1d' },

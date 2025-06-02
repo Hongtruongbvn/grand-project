@@ -10,6 +10,6 @@ import { User, UserSchema } from './schema/user.schema'; // Giả sử file sche
   ],
   controllers: [UserController],
   providers: [UserService],
-  exports: [MongooseModule], // Nếu bạn cần sử dụng User model ở các module khác
+  exports: [MongooseModule, UserService], // Nếu bạn cần sử dụng User model ở các module khác
 })
 export class UserModule {}

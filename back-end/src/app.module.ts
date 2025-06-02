@@ -15,9 +15,12 @@ import { GroupModule } from './group/group.module';
 import { StoryModule } from './story/story.module';
 import { MessageModule } from './message/message.module';
 import { ChatroomModule } from './chatroom/chatroom.module';
+import { MailModule } from './mail/mail.module';
+import { ConfigModule } from '@nestjs/config'; 
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
     MongooseModule.forRoot('mongodb://localhost:27017/grand'),
 
     UserModule,
@@ -33,6 +36,7 @@ import { ChatroomModule } from './chatroom/chatroom.module';
     StoryModule,
     MessageModule,
     ChatroomModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

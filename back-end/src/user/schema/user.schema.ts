@@ -58,6 +58,12 @@ export class User {
 
   @Prop({ type: [Types.ObjectId], ref: 'Interest' })
   interest_id: Types.ObjectId[];
+
+  @Prop()
+  resetPasswordOtp?: string;
+
+  @Prop()
+  resetPasswordOtpExpiry?: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

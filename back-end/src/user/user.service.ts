@@ -17,4 +17,23 @@ export class UserService {
     });
     return createdUser.save();
   }
+
+  async findByEmail(email: string): Promise<User | null> {
+    return this.userModel.findOne({ email }).exec();
+  }
+
+  async updateResetPasswordOtp(email: string, otp: string | null, expiry: Date | null) {
+    return this.userModel.updateOne(
+      { email },
+      { resetPasswordOtp: otp, resetPasswordOtpExpiry: expiry },
+    );
+  }
+
+  async updatePassword(email: string, newPassword: string) {
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    return this.userModel.updateOne(
+      { email },
+      { password: hashedPassword, resetPasswordOtp: null, resetPasswordOtpExpiry: null },
+    );
+  }
 }

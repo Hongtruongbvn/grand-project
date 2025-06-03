@@ -8,7 +8,7 @@ import styles from "./Login.module.scss";
 
 export default function Login() {
   const [form, setForm] = useState({
-    emailOrUsername: "",
+    email: "",
     password: "",
   });
   const [err, setErr] = useState("");
@@ -21,7 +21,7 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await login({ email: form.emailOrUsername, password: form.password });
+      await login({ email: form.email, password: form.password });
       navigate("/");
     } catch (err: any) {
       setErr(err.message || "Đăng nhập thất bại");
@@ -49,10 +49,10 @@ export default function Login() {
               {err && <p className={styles.errorMessage}>{err}</p>}
 
               <input
-                name="emailOrUsername"
+                name="email"
                 type="text"
-                placeholder="Email hoặc Tên người dùng"
-                value={form.emailOrUsername}
+                placeholder="Email"
+                value={form.email}
                 onChange={handleChange}
                 required
               />

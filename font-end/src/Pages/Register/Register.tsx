@@ -81,14 +81,6 @@ export default function Register() {
                 onChange={handleChange}
                 required
               />
-              {/* <input
-                name="address"
-                type="text"
-                placeholder="Địa chỉ (không bắt buộc)"
-                value={form.address}
-                onChange={handleChange}
-              /> */}
-
               <motion.button
                 type="submit"
                 whileHover={{ scale: 1.05 }}
@@ -97,10 +89,6 @@ export default function Register() {
               >
                 {loading ? "Đang đăng ký..." : "Đăng Ký"}
               </motion.button>
-
-              <div className={styles.links}>
-                <span onClick={() => navigate("/login")}>Đã có tài khoản?</span>
-              </div>
             </motion.form>
           </AuthFormWrapper>
         </div>

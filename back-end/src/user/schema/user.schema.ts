@@ -64,6 +64,17 @@ export class User {
 
   @Prop()
   resetPasswordOtpExpiry?: Date;
+
+  @Prop()
+  location?: string;
+
+  @Prop()
+  statusMessage?: string;
+
+  @Prop()
+  website?: string;
+
+
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

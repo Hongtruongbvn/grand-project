@@ -1,12 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from './schema/user.schema';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
+  findById(userId: any) {
+    throw new Error('Method not implemented.');
+  }
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
   async register(createUserDto: CreateUserDto): Promise<User> {
@@ -35,5 +39,13 @@ export class UserService {
       { email },
       { password: hashedPassword, resetPasswordOtp: null, resetPasswordOtpExpiry: null },
     );
+  }
+
+  async updateProfile(userId: string, updateDto: UpdateUserDto) {
+    const updated = await this.userModel.findByIdAndUpdate(userId, updateDto, {
+    new: true,
+      }).select('-password');
+      if (!updated) throw new NotFoundException('User not found');
+      return updated;
   }
 }

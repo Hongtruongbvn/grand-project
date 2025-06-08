@@ -1,16 +1,15 @@
-// src/pages/Home/Home.module.scss
-@use "../../Style/Theme.scss" as *;
+@use "../../Style/Theme.scss" as theme;
 
 .home {
-  @include themify($themes) {
+  @include theme.themify(theme.$themes) {
     padding: 20px 70px;
-    background-color: themed("bgSoft");
+    background-color: theme.themed("bgSoft");
 
-    @include mobile {
+    @include theme.mobile {
       padding: 10px;
     }
 
-    @include tablet {
+    @include theme.tablet {
       padding: 20px;
     }
   }

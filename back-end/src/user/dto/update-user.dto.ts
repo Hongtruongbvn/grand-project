@@ -7,4 +7,6 @@ export class UpdateUserDto {
   readonly location?: string;
   readonly statusMessage?: string;
   readonly website?: string;
+
+  
 }

@@ -1,16 +1,29 @@
-// import Stories from "../../components/stories/Stories"
-// import Posts from "../../components/posts/Posts"
-// import Share from "../../components/share/Share"
-import "../Home/Home.module.scss"
+import styles from "./Home.module.scss";
+import Group from "../Group/Group";
+import Friend from "../Friend/Friend";
 
 const Home = () => {
   return (
-    <div className="home">
-      {/* <Stories/>
-      <Share/>
-      <Posts/> */}
-    </div>
-  )
-}
+    <div className={styles.home}>
+      <div className={styles.layout}>
+        <div className={styles.leftSidebar}>
+          <Group />
+        </div>
 
-export default Home
+        <div className={styles.mainContent}>
+          <div className={styles.feed}>
+            <h2>Main Feed</h2>
+            <p>Share moments, thoughts, photos...</p>
+            {/* Có thể thêm component như: CreatePost, Stories, PostList */}
+          </div>
+        </div>
+
+        <div className={styles.rightSidebar}>
+          <Friend />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Home;

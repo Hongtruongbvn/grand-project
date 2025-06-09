@@ -16,7 +16,7 @@ const App = () => {
       <Route path="/home" element={<Home />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       {/* Route chính sau khi đăng nhập */}
-      <Route path="/" element={<div className="text-center p-10">Welcome to Social App 🚀</div>} />
+      {/* <Route path="/" element={<div className="text-center p-10">Welcome to Social App 🚀</div>} /> */}
       <Route path="/profile" element={<ProfileUser />} />
     </Routes>
   );

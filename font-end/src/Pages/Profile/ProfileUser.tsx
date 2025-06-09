@@ -1,35 +1,58 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { FaMapMarkerAlt, FaEnvelope, FaUserFriends } from "react-icons/fa";
+import { FaMapMarkerAlt, FaGlobe, FaUserAlt } from "react-icons/fa";
 import { MdOutlineCake } from "react-icons/md";
+import { GiThreeFriends } from "react-icons/gi";
 import styles from "./ProfileUser.module.scss";
-// import Posts from "../../components/posts/Posts";
 
-interface UserProfile {
+export interface UserProfile {
   username: string;
-  email: string;
-  address?: string;
-  birthday?: string;
   avatar?: string;
-  xp: number;
-  friends_id: string[];
-  post_id: string[];
+  bio?: string;
+  age?: number;
+  interests?: string[];
+  location?: string;
+  statusMessage?: string;
+  website?: string;
 }
 
 export default function ProfileUser() {
-  const { id } = useParams();
   const [user, setUser] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      const res = await fetch(`http://localhost:3000/users/${id}`);
+useEffect(() => {
+  const fetchProfile = async () => {
+    const token = localStorage.getItem("token");
+    console.log("Token lấy từ localStorage:", token);
+
+    try {
+      const res = await fetch("http://localhost:3000/users/profile", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`Không thể lấy thông tin người dùng, status: ${res.status}, message: ${errorText}`);
+      }
+
       const data = await res.json();
-      setUser(data);
-    };
-    fetchUser();
-  }, [id]);
+      setUser({
+        ...data,
+        interests: Array.isArray(data.interests) ? data.interests : [],
+      });
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  if (!user) return <div className={styles.loading}>Đang tải thông tin...</div>;
+  fetchProfile();
+}, []);
+
+  if (loading) return <div className={styles.loading}>Đang tải...</div>;
+  if (!user) return <div className={styles.error}>Không tìm thấy người dùng</div>;
 
   return (
     <div className={styles.profileUser}>
@@ -41,35 +64,42 @@ export default function ProfileUser() {
             className={styles.avatar}
           />
           <h2>{user.username}</h2>
-          <p>{user.email}</p>
+          {user.statusMessage && <p className={styles.status}>{user.statusMessage}</p>}
         </div>
 
         <div className={styles.infoGrid}>
-          {user.address && (
+          {user.bio && (
+            <div className={styles.infoItem}>
+              <FaUserAlt />
+              <span>{user.bio}</span>
+            </div>
+          )}
+          {user.location && (
             <div className={styles.infoItem}>
               <FaMapMarkerAlt />
-              <span>{user.address}</span>
+              <span>{user.location}</span>
             </div>
           )}
-          {user.birthday && (
+          {user.age && (
             <div className={styles.infoItem}>
               <MdOutlineCake />
-              <span>{new Date(user.birthday).toLocaleDateString()}</span>
+              <span>{user.age} tuổi</span>
             </div>
           )}
-          <div className={styles.infoItem}>
-            <FaUserFriends />
-            <span>{user.friends_id.length} bạn bè</span>
-          </div>
-          <div className={styles.infoItem}>
-            <span className={styles.xpLabel}>XP:</span>
-            <span>{user.xp}</span>
-          </div>
-        </div>
-
-        <div className={styles.postSection}>
-          <h3>Bài viết</h3>
-          {/* <Posts postIds={user.post_id} /> */}
+          {user.website && (
+            <div className={styles.infoItem}>
+              <FaGlobe />
+              <a href={user.website} target="_blank" rel="noreferrer">
+                {user.website}
+              </a>
+            </div>
+          )}
+          {Array.isArray(user.interests) && user.interests.length > 0 && (
+            <div className={styles.infoItem}>
+              <GiThreeFriends />
+              <span>Sở thích: {user.interests.join(", ")}</span>
+            </div>
+          )}
         </div>
       </div>
     </div>

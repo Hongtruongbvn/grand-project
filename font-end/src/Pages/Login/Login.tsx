@@ -18,15 +18,18 @@ export default function Login() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await login({ email: form.email, password: form.password });
-      navigate("/");
-    } catch (err: any) {
-      setErr(err.message || "Đăng nhập thất bại");
-    }
-  };
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  try {
+    const data = await login({ email: form.email, password: form.password });
+    console.log("Login response:", data);  // Xem dữ liệu nhận được
+    localStorage.setItem("token", data.token); // Hoặc data.accessToken nếu khác key
+    navigate("/home");
+  } catch (err: any) {
+    console.error("Login error:", err);
+    setErr(err.message || "Đăng nhập thất bại");
+  }
+};
 
   return (
     <div className={styles.loginPage}>
@@ -59,6 +62,7 @@ export default function Login() {
               <input
                 name="password"
                 type="password"
+                autoComplete="current-password"
                 placeholder="Mật khẩu"
                 value={form.password}
                 onChange={handleChange}

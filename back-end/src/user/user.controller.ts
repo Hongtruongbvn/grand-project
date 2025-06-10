@@ -1,8 +1,17 @@
-import { Body, Controller, Get, Post, Put, Req, UseGuards} from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  UseGuards,
+  Get,
+  Patch,
+  Request,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { AuthGuard } from '@nestjs/passport';
+import { UpdateProfileDto } from './dto/update-user.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+
 
 @Controller('users')
 export class UserController {
@@ -13,17 +22,19 @@ export class UserController {
     return this.userService.register(dto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
-  @Get('profile')
-  async getProfile(@Req() req) {
-    const userId = req.user.userId; // JWT phải chứa userId
-    return this.userService.findById(userId);
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  async getMyProfile(@Request() req) {
+    console.log('REQ.USER:', req.user);
+    return this.userService.findById(req.user.userId);
   }
 
-  @UseGuards(AuthGuard('jwt'))
-  @Put('profile')
-  async updateProfile(@Req() req, @Body() updateDto: UpdateUserDto) {
-    const userId = req.user.userId;
-    return this.userService.updateProfile(userId, updateDto);
+  @UseGuards(JwtAuthGuard)
+  @Patch('me/update')
+  async updateMyProfile(
+    @Request() req,
+    @Body() updateDto: UpdateProfileDto,
+  ) {
+    return this.userService.updateProfile(req.user.userId, updateDto);
   }
 }

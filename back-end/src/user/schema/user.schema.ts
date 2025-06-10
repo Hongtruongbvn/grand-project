@@ -74,6 +74,32 @@ export class User {
   @Prop()
   website?: string;
 
+  @Prop()
+  bio?: string;
+
+  @Prop({ enum: ['male', 'female', 'other'], default: 'other' })
+  gender?: string;
+
+  @Prop()
+  coverImage?: string;
+
+  @Prop({
+  type: {
+    facebook: { type: String },
+    instagram: { type: String },
+    github: { type: String },
+    tiktok: { type: String },
+  },
+  default: {},
+  })
+  socialLinks?: {
+    facebook?: string;
+    instagram?: string;
+    github?: string;
+    tiktok?: string;
+  };
+
+
 
 }
 

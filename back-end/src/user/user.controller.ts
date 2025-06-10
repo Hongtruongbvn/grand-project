@@ -58,4 +58,6 @@ export class UserController {
     return this.userService.updateProfile(req.user.userId, updateDto);
   }
 
+  
+
 }

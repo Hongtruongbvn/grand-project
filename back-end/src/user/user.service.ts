@@ -5,6 +5,7 @@ import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from './dto/create-user.dto';
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
@@ -17,12 +18,21 @@ import { UpdateProfileDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
+=======
+import { UpdateProfileDto } from './dto/update-user.dto';
+
+@Injectable()
+export class UserService {
+>>>>>>> Stashed changes
   // updateProfile(userId: any, updateDto: UpdateProfileDto) {
   //   throw new Error('Method not implemented.');
   // }
   // findById(userId: any) {
   //   throw new Error('Method not implemented.');
   // }
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
@@ -54,6 +64,7 @@ export class UserService {
     );
   }
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 
   async updateProfile(userId: string, updateDto: UpdateUserDto) {
     const updated = await this.userModel.findByIdAndUpdate(userId, updateDto, {
@@ -62,6 +73,8 @@ export class UserService {
       if (!updated) throw new NotFoundException('User not found');
       return updated;
 =======
+=======
+>>>>>>> Stashed changes
   async findById(userId: string) {
     const user = await this.userModel.findById(userId).select('-password');
     if (!user) {
@@ -73,6 +86,9 @@ export class UserService {
   async updateProfile(userId: string, updateDto: UpdateProfileDto) {
     await this.userModel.updateOne({ _id: userId }, { $set: updateDto });
     return this.findById(userId);
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
   }
   

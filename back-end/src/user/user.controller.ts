@@ -6,6 +6,7 @@ import {
   Get,
   Patch,
   Request,
+<<<<<<< Updated upstream
   Req,
   Put,
 } from '@nestjs/common';
@@ -16,6 +17,13 @@ import { AuthGuard } from '@nestjs/passport';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 
+=======
+} from '@nestjs/common';
+import { UserService } from './user.service';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateProfileDto } from './dto/update-user.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+>>>>>>> Stashed changes
 
 
 @Controller('users')
@@ -27,6 +35,7 @@ export class UserController {
     return this.userService.register(dto);
   }
 
+<<<<<<< Updated upstream
 
   @UseGuards(AuthGuard('jwt'))
   @Get('profile')
@@ -43,6 +52,8 @@ export class UserController {
   }
   
 
+=======
+>>>>>>> Stashed changes
   @UseGuards(JwtAuthGuard)
   @Get('me')
   async getMyProfile(@Request() req) {
@@ -57,7 +68,10 @@ export class UserController {
   ) {
     return this.userService.updateProfile(req.user.userId, updateDto);
   }
+<<<<<<< Updated upstream
 
   
 
+=======
+>>>>>>> Stashed changes
 }

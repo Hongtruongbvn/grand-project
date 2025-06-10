@@ -1,4 +1,5 @@
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 export class UpdateUserDto {
   readonly username?: string;
   readonly avatar?: string;
@@ -12,6 +13,8 @@ export class UpdateUserDto {
   
 =======
 
+=======
+>>>>>>> Stashed changes
 import {
   IsOptional,
   IsString,
@@ -57,5 +60,8 @@ export class UpdateProfileDto {
     github?: string;
     tiktok?: string;
   };
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 }

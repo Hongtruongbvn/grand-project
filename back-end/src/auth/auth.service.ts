@@ -26,7 +26,7 @@ export class AuthService {
   }
 
   async login(user: any) {
-    const payload = { username: user.username, role: user.role, exp: user.xp };
+    const payload = { username: user.username, role: user.role_id };
     return {
       access_token: this.jwtService.sign(payload),
     };
@@ -68,10 +68,17 @@ export class AuthService {
     return { resetToken };
   }
 
-  async resetPasswordWithToken(email: string, resetToken: string, newPassword: string) {
+  async resetPasswordWithToken(
+    email: string,
+    resetToken: string,
+    newPassword: string,
+  ) {
     try {
-      const payload = this.jwtService.verify(resetToken, { secret: process.env.JWT_SECRET });
-      if (payload.email !== email) throw new BadRequestException('Token không hợp lệ');
+      const payload = this.jwtService.verify(resetToken, {
+        secret: process.env.JWT_SECRET,
+      });
+      if (payload.email !== email)
+        throw new BadRequestException('Token không hợp lệ');
     } catch {
       throw new BadRequestException('Token hết hạn hoặc không hợp lệ');
     }

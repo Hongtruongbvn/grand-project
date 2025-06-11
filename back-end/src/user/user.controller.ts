@@ -112,12 +112,13 @@ export class UserController {
     const fromUserId = req.user.userId; // 👈 lấy userId hiện tại từ token
     return this.userService.sendFriendRequest(fromUserId, toUserId);
   }
+  @UseGuards(JwtAuthGuard)
   @Post('friend/accept/:requesterId')
   async acceptFriendRequest(
     @Param('requesterId') requesterId: string,
     @Req() req: any,
   ) {
-    return this.userService.acceptFriendRequest(req.user._id, requesterId);
+    return this.userService.acceptFriendRequest(req.user.userId, requesterId);
   }
   @UseGuards(JwtAuthGuard)
   @Post('friend/reject/:requesterId')

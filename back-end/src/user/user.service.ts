@@ -140,26 +140,35 @@ export class UserService {
   }
   async acceptFriendRequest(currentUserId: string, requesterId: string) {
     const currentUser = await this.userModel.findById(currentUserId);
-    const requesterUser = await this.userModel.findById(requesterId);
+    const requester = await this.userModel.findById(requesterId);
 
-    if (!currentUser || !requesterUser) {
+    if (!currentUser || !requester) {
       throw new Error('User not found');
     }
-    if (!currentUser.acceptFriend.includes(requesterId)) {
-      throw new Error('No friend request from this user');
-    }
-    currentUser.friend_id.push(new Types.ObjectId(requesterId));
-    requesterUser.friend_id.push(new Types.ObjectId(currentUserId));
 
+    // Xóa lời mời kết bạn
     currentUser.acceptFriend = currentUser.acceptFriend.filter(
       (id) => id !== requesterId,
     );
 
-    await currentUser.save();
-    await requesterUser.save();
+    // Khởi tạo nếu mảng chưa có
+    if (!currentUser.friend_id) currentUser.friend_id = [];
+    if (!requester.friend_id) requester.friend_id = [];
 
-    return { message: 'Friend request accepted successfully' };
+    // 👇 Ép kiểu string sang ObjectId
+    const requesterObjectId = new Types.ObjectId(requesterId);
+    const currentUserObjectId = new Types.ObjectId(currentUserId);
+
+    // Thêm bạn bè
+    currentUser.friend_id.push(requesterObjectId);
+    requester.friend_id.push(currentUserObjectId);
+
+    await currentUser.save();
+    await requester.save();
+
+    return { message: 'Friend request accepted' };
   }
+
   async rejectFriendRequest(currentUserId: string, requesterId: string) {
     const currentUser = await this.userModel.findById(currentUserId);
     if (!currentUser) {

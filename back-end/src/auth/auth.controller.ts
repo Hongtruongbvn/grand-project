@@ -17,4 +17,24 @@ export class AuthController {
     }
     return this.authService.login(user);
   }
+  @Post('send-otp')
+  async sendOtp(@Body('email') email: string) {
+    return this.authService.sendResetOtp(email);
+  }
+
+  @Post('verify-otp')
+  async verifyOtp(@Body() body: { email: string; otp: string }) {
+    return this.authService.verifyOtpAndGenerateToken(body.email, body.otp);
+  }
+
+  @Post('reset')
+  async resetPassword(
+    @Body() body: { email: string; resetToken: string; newPassword: string },
+  ) {
+    return this.authService.resetPasswordWithToken(
+      body.email,
+      body.resetToken,
+      body.newPassword,
+    );
+  }
 }

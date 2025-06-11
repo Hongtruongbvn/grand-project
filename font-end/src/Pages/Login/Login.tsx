@@ -1,0 +1,90 @@
+// src/pages/Login.tsx
+import { useState } from "react";
+import { login } from "../../Api/Auth";
+import AuthFormWrapper from "../../Components/AuthFormWrapper";
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import styles from "./Login.module.scss";
+
+export default function Login() {
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+  });
+  const [err, setErr] = useState("");
+  const navigate = useNavigate();
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  try {
+    const data = await login({ email: form.email, password: form.password });
+    console.log("Login response:", data);  // Xem dữ liệu nhận được
+    localStorage.setItem("token", data.token); // Hoặc data.accessToken nếu khác key
+    navigate("/home");
+  } catch (err: any) {
+    console.error("Login error:", err);
+    setErr(err.message || "Đăng nhập thất bại");
+  }
+};
+
+  return (
+    <div className={styles.loginPage}>
+      <div className={styles.card}>
+        <div className={styles.left}>
+          <h1>Kết nối & Giao tiếp</h1>
+          <p>Khám phá cộng đồng sống động và đầy cảm hứng!</p>
+          <div className={styles.buttonsRegister}>
+            <button onClick={() => navigate("/register")}>Tạo tài khoản</button>
+          </div>
+        </div>
+        <div className={styles.right}>
+          <AuthFormWrapper title="Đăng Nhập">
+            <motion.form
+              onSubmit={handleSubmit}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              {err && <p className={styles.errorMessage}>{err}</p>}
+
+              <input
+                name="email"
+                type="text"
+                placeholder="Email"
+                value={form.email}
+                onChange={handleChange}
+                required
+              />
+              <input
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                placeholder="Mật khẩu"
+                value={form.password}
+                onChange={handleChange}
+                required
+              />
+              <motion.button
+                type="submit"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                Đăng Nhập
+              </motion.button>
+
+              <div className={styles.links}>
+                <span onClick={() => navigate("/forgot-password")}>
+                  Quên mật khẩu?
+                </span>
+              </div>
+            </motion.form>
+          </AuthFormWrapper>
+        </div>
+      </div>
+    </div>
+  );
+}

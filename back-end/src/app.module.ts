@@ -16,12 +16,14 @@ import { ChatroomModule } from './chatroom/chatroom.module';
 import { GlobalRoleModule } from './global-role/global-role.module';
 import { TypeModule } from './type/type.module';
 import { InterestModule } from './interest/interest.module';
+
 import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
     MongooseModule.forRoot(process.env.MONGOOSE as string),
+
     UserModule,
     AuthModule,
     RoleModule,

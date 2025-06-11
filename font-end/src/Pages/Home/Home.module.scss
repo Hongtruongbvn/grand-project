@@ -1,0 +1,51 @@
+@use "../../Style/Theme.scss" as theme;
+
+.home {
+  padding: 20px 60px;
+  background-color: #e3f2a5; // nền rất nhạt và tươi
+
+  min-height: 100vh;
+
+  @include theme.mobile {
+    padding: 10px;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 1.5fr 3fr 1.5fr;
+    gap: 24px;
+    margin-top: 40px;
+
+    @include theme.tablet {
+      grid-template-columns: 1fr;
+    }
+
+    .leftSidebar,
+    .rightSidebar,
+    .mainContent {
+      background-color: #a8d8a2; // block content màu xanh nhạt
+      padding: 1rem;
+      border-radius: 20px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+      color: #1f5e47; // text màu xanh đậm
+
+      transition: background-color 0.3s ease;
+    }
+
+    .feed {
+      text-align: center;
+
+      h2 {
+        font-size: 22px;
+        font-weight: 700;
+        color: #2c7d5f;
+        margin-bottom: 12px;
+      }
+
+      p {
+        color: #4b9a73;
+      }
+    }
+  }
+}
+

@@ -4,7 +4,8 @@ import { User } from './schema/user.schema';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateProfileDto } from './dto/update-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+
 
 
 @Injectable()
@@ -48,7 +49,7 @@ export class UserService {
   return user;
 }
 
-async updateProfile(userId: string, updateDto: UpdateProfileDto) {
+async updateProfile(userId: string, updateDto: UpdateUserDto) {
   await this.userModel.updateOne({ _id: userId }, { $set: updateDto });
   return this.findById(userId); // Trả lại user mới sau cập nhật
 }

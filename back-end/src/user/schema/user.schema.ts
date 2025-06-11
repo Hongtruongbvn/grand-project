@@ -44,6 +44,12 @@ export class User extends Document {
   acceptFriend: string[];
   @Prop({ required: true, enum: ['male', 'female', 'other'] })
   gender: string;
+
+   @Prop()
+  resetPasswordOtp?: string;
+
+  @Prop()
+  resetPasswordOtpExpiry?: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

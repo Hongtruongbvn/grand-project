@@ -9,8 +9,8 @@ import {
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateProfileDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 
 @Controller('users')
@@ -33,7 +33,7 @@ export class UserController {
   @Patch('me/update')
   async updateMyProfile(
     @Request() req,
-    @Body() updateDto: UpdateProfileDto,
+    @Body() updateDto: UpdateUserDto,
   ) {
     return this.userService.updateProfile(req.user.userId, updateDto);
   }

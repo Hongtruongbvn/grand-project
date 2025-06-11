@@ -19,9 +19,8 @@ export class InterestController {
   create(@Body() createInterestDto: CreateInterestDto) {
     return this.interestService.create(createInterestDto);
   }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.interestService.remove(+id);
+  @Get()
+  async getAllInterests() {
+    return this.interestService.findAll();
   }
 }

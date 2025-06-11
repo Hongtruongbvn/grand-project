@@ -1,17 +1,19 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from './schema/user.schema';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { GlobalRoleService } from 'src/global-role/global-role.service';
+import { InterestService } from 'src/interest/interest.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
     private readonly globalRoleService: GlobalRoleService,
+    private readonly interestService: InterestService,
   ) {}
   async register(createUserDto: CreateUserDto): Promise<User> {
     try {
@@ -81,6 +83,18 @@ export class UserService {
     return this.userModel.updateOne(
       { _id: userId },
       { $set: { global_role_id: role?._id } },
+    );
+  }
+  async addInterestsToUser(userId: string, interestIds: string[]) {
+    const validInterests = await this.interestService.findByIds(interestIds);
+
+    if (validInterests.length !== interestIds.length) {
+      throw new BadRequestException('Một hoặc nhiều sở thích không hợp lệ');
+    }
+
+    return this.userModel.updateOne(
+      { _id: userId },
+      { $set: { interest_id: interestIds } },
     );
   }
 }

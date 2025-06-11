@@ -1,26 +1,24 @@
 import { Injectable } from '@nestjs/common';
 import { CreateInterestDto } from './dto/create-interest.dto';
 import { UpdateInterestDto } from './dto/update-interest.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { Interest } from './schema/interest.schema';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class InterestService {
-  create(createInterestDto: CreateInterestDto) {
-    return 'This action adds a new interest';
+  constructor(
+    @InjectModel(Interest.name) private interestModel: Model<Interest>,
+  ) {}
+  async create(createInterestDto: CreateInterestDto) {
+    const create = await new this.interestModel(createInterestDto);
+    return create.save();
   }
-
-  findAll() {
-    return `This action returns all interest`;
+  async findAll() {
+    const allInterest = await this.interestModel.find().exec();
+    return allInterest;
   }
-
-  findOne(id: number) {
-    return `This action returns a #${id} interest`;
-  }
-
-  update(id: number, updateInterestDto: UpdateInterestDto) {
-    return `This action updates a #${id} interest`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} interest`;
+  async findByIds(ids: string[]): Promise<Interest[]> {
+    return this.interestModel.find({ _id: { $in: ids } });
   }
 }

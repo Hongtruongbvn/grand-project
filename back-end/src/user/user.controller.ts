@@ -7,12 +7,18 @@ import {
   Patch,
   Request,
   BadRequestException,
+  HttpException,
+  HttpStatus,
+  Query,
+  Param,
+  Req,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { Types } from 'mongoose';
 
 @Controller('users')
 export class UserController {
@@ -63,5 +69,54 @@ export class UserController {
       dto.interestIds,
     );
     return { message: 'Cập nhật sở thích thành công', data: result };
+  }
+  @Get('find/email')
+  async getUserByEmail(@Query('email') email: string) {
+    if (!email) {
+      throw new HttpException('Email is required', HttpStatus.BAD_REQUEST);
+    }
+    return this.userService.findByEmail(email);
+  }
+  @Get('find/gender/:gender')
+  async getUsersByGender(@Param('gender') gender: string) {
+    if (!['male', 'female', 'other'].includes(gender)) {
+      throw new HttpException('Invalid gender value', HttpStatus.BAD_REQUEST);
+    }
+    return this.userService.findByGender(gender as 'male' | 'female' | 'other');
+  }
+  @Get('find/interest') //http:localhost:9090/users/find/interest?ids=665fc03109cc9925f82473a1,665fc03109cc9925f82473a2,665fc03109cc9925f82473a3
+  async getUsersByInterest(@Query('ids') ids: string) {
+    if (!ids) {
+      throw new HttpException(
+        'hãy thử users/find/interest?ids=665fc03109cc9925f82473a1,665fc03109cc9925f82473a2,',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const idArray = ids.split(',').filter((id) => Types.ObjectId.isValid(id));
+    if (idArray.length === 0) {
+      throw new HttpException(
+        'No valid interest IDs provided',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return this.userService.findByInterestIds(
+      idArray.map((id) => new Types.ObjectId(id)),
+    );
+  }
+  @UseGuards(JwtAuthGuard)
+  @Post('friend/request/:toUserId')
+  async sendFriendRequest(
+    @Param('toUserId') toUserId: string,
+    @Request() req: any,
+  ) {
+    const fromUserId = req.user.userId; // 👈 lấy userId hiện tại từ token
+    return this.userService.sendFriendRequest(fromUserId, toUserId);
+  }
+  @Post('friend/accept/:requesterId')
+  async acceptFriendRequest(
+    @Param('requesterId') requesterId: string,
+    @Req() req: any,
+  ) {
+    return this.userService.acceptFriendRequest(req.user._id, requesterId);
   }
 }

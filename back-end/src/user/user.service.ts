@@ -97,4 +97,67 @@ export class UserService {
       { $set: { interest_id: interestIds } },
     );
   }
+  async findUserByEmail(email: string) {
+    const user = await this.userModel.findOne({ email }).select('-password');
+    if (!user) {
+      throw new Error('User with this email not found');
+    }
+    return user;
+  }
+  async findByGender(gender: 'male' | 'female' | 'other') {
+    const users = await this.userModel.find({ gender }).select('-password');
+    if (!users || users.length === 0) {
+      throw new Error(`No users found with gender: ${gender}`);
+    }
+    return users;
+  }
+  async findByInterestIds(interestIds: Types.ObjectId[]) {
+    const users = await this.userModel
+      .find({ interest_id: { $in: interestIds } })
+      .select('-password');
+
+    if (!users || users.length === 0) {
+      throw new Error('No users found with the provided interest IDs');
+    }
+
+    return users;
+  }
+  //friend
+  async sendFriendRequest(fromUserId: string, toUserId: string) {
+    const toUser = await this.userModel.findById(toUserId);
+    if (!toUser) {
+      throw new Error('User to send request to not found');
+    }
+
+    if (toUser.acceptFriend.includes(fromUserId)) {
+      throw new Error('Friend request already sent');
+    }
+
+    toUser.acceptFriend.push(fromUserId);
+    await toUser.save();
+
+    return { message: 'Friend request sent successfully' };
+  }
+  async acceptFriendRequest(currentUserId: string, requesterId: string) {
+    const currentUser = await this.userModel.findById(currentUserId);
+    const requesterUser = await this.userModel.findById(requesterId);
+
+    if (!currentUser || !requesterUser) {
+      throw new Error('User not found');
+    }
+    if (!currentUser.acceptFriend.includes(requesterId)) {
+      throw new Error('No friend request from this user');
+    }
+    currentUser.friend_id.push(new Types.ObjectId(requesterId));
+    requesterUser.friend_id.push(new Types.ObjectId(currentUserId));
+
+    currentUser.acceptFriend = currentUser.acceptFriend.filter(
+      (id) => id !== requesterId,
+    );
+
+    await currentUser.save();
+    await requesterUser.save();
+
+    return { message: 'Friend request accepted successfully' };
+  }
 }

@@ -7,21 +7,22 @@ import { AuthModule } from './auth/auth.module';
 import { RoleModule } from './role/role.module';
 import { PostModule } from './post/post.module';
 import { CommentModule } from './comment/comment.module';
-import { TypeModule } from './type/type.module';
-import { InterestModule } from './interest/interest.module';
 import { ReportModule } from './report/report.module';
 import { BlockModule } from './block/block.module';
 import { GroupModule } from './group/group.module';
 import { StoryModule } from './story/story.module';
 import { MessageModule } from './message/message.module';
 import { ChatroomModule } from './chatroom/chatroom.module';
-import { MailModule } from './mail/mail.module';
+import { GlobalRoleModule } from './global-role/global-role.module';
+import { TypeModule } from './type/type.module';
+import { InterestModule } from './interest/interest.module';
+
 import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
-    MongooseModule.forRoot('mongodb://localhost:27017/grand'),
+    ConfigModule.forRoot(),
+    MongooseModule.forRoot(process.env.MONGOOSE as string),
 
     UserModule,
     AuthModule,
@@ -36,7 +37,7 @@ import { ConfigModule } from '@nestjs/config';
     StoryModule,
     MessageModule,
     ChatroomModule,
-    MailModule,
+    GlobalRoleModule,
   ],
   controllers: [AppController],
   providers: [AppService],

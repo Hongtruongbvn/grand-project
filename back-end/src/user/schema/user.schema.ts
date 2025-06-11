@@ -1,30 +1,21 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 
-export type UserDocument = User & Document;
-
-@Schema()
-export class User {
+@Schema({ timestamps: true })
+export class User extends Document {
+  @Prop({ required: true })
+  username: string;
+  @Prop()
+  salt: string;
   @Prop({ required: true })
   password: string;
-
-  @Prop()
-  saild: string;
-
-  @Prop({ type: Types.ObjectId, ref: 'Role', default: 'user' })
-  role_id: Types.ObjectId;
-
-  @Prop({ type: Number, default: 0 })
+  @Prop({ default: 0 })
   xp: number;
-
-  @Prop({ type: Types.ObjectId, ref: 'Type', default: 'user' })
-  type_id: Types.ObjectId;
-
-  @Prop({ type: [Types.ObjectId], ref: 'Post' })
-  post_id: Types.ObjectId[];
-
   @Prop({ required: true, unique: true })
   email: string;
+
+  @Prop()
+  avatar: string;
 
   @Prop()
   address: string;
@@ -32,75 +23,27 @@ export class User {
   @Prop()
   birthday: Date;
 
-  @Prop()
-  influencer_id: string;
-
-  @Prop()
+  @Prop({ default: true })
   status: boolean;
 
-  @Prop({ type: [Types.ObjectId], ref: 'Comment' })
-  comments_id: Types.ObjectId[];
+  @Prop({ type: Types.ObjectId, ref: 'GlobalRole' })
+  global_role_id: Types.ObjectId;
 
-  @Prop({ type: [Types.ObjectId], ref: 'User' })
-  friends_id: Types.ObjectId[];
+  @Prop({ default: false })
+  hideProfile: boolean;
 
-  @Prop({ required: true, unique: true })
-  username: string;
-
-  @Prop({ type: [Types.ObjectId], ref: 'Block' })
-  block_id: Types.ObjectId[];
-
-  @Prop()
-  avatar: string;
-
-  @Prop({ type: Types.ObjectId, ref: 'Story' })
-  story_id: Types.ObjectId[];
-
-  @Prop({ type: [Types.ObjectId], ref: 'Interest' })
+  @Prop({ type: Types.ObjectId, ref: 'Notification' })
+  notification: Types.ObjectId[];
+  @Prop({ type: Types.ObjectId, ref: 'Type' })
+  type_id: Types.ObjectId[];
+  @Prop({ type: Types.ObjectId, ref: 'Interest' })
   interest_id: Types.ObjectId[];
-
+  @Prop({ type: Types.ObjectId, ref: 'User' })
+  friend_id: Types.ObjectId[];
   @Prop()
-  resetPasswordOtp?: string;
-
-  @Prop()
-  resetPasswordOtpExpiry?: Date;
-
-  @Prop()
-  location?: string;
-
-  @Prop()
-  statusMessage?: string;
-
-  @Prop()
-  website?: string;
-
-  @Prop()
-  bio?: string;
-
-  @Prop({ enum: ['male', 'female', 'other'], default: 'other' })
-  gender?: string;
-
-  @Prop()
-  coverImage?: string;
-
-  @Prop({
-  type: {
-    facebook: { type: String },
-    instagram: { type: String },
-    github: { type: String },
-    tiktok: { type: String },
-  },
-  default: {},
-  })
-  socialLinks?: {
-    facebook?: string;
-    instagram?: string;
-    github?: string;
-    tiktok?: string;
-  };
-
-
-
+  acceptFriend: string[];
+  @Prop({ required: true, enum: ['male', 'female', 'other'] })
+  gender: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

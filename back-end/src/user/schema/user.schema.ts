@@ -5,12 +5,16 @@ import { Document, Types } from 'mongoose';
 export class User extends Document {
   @Prop({ required: true })
   username: string;
+
   @Prop()
   salt: string;
+
   @Prop({ required: true })
   password: string;
+
   @Prop({ default: 0 })
   xp: number;
+
   @Prop({ required: true, unique: true })
   email: string;
 
@@ -34,18 +38,23 @@ export class User extends Document {
 
   @Prop({ type: Types.ObjectId, ref: 'Notification' })
   notification: Types.ObjectId[];
+
   @Prop({ type: Types.ObjectId, ref: 'Type' })
   type_id: Types.ObjectId[];
+
   @Prop({ type: Types.ObjectId, ref: 'Interest' })
   interest_id: Types.ObjectId[];
+
   @Prop({ type: Types.ObjectId, ref: 'User' })
   friend_id: Types.ObjectId[];
+
   @Prop()
   acceptFriend: string[];
+
   @Prop({ required: true, enum: ['male', 'female', 'other'] })
   gender: string;
 
-   @Prop()
+  @Prop()
   resetPasswordOtp?: string;
 
   @Prop()

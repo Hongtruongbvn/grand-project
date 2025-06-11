@@ -7,7 +7,7 @@ export class Interest extends Document {
   @Prop({ required: true, default: 'sở thích' })
   name: string;
 
-  @Prop({ required: true, enum: ['game', 'sport', 'music', 'reading'] })
+  @Prop({ required: true })
   type: string;
 }
 

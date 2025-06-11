@@ -10,8 +10,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 
 import { UserModule } from '../user/user.module';
 import { MailModule } from '../mail/mail.module';
-
-
+import { MailService } from 'src/mail/mail.service';
 
 @Module({
   imports: [

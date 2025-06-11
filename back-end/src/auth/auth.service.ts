@@ -26,9 +26,20 @@ export class AuthService {
   }
 
   async login(user: any) {
-    const payload = {sub: user._id, username: user.username, role: user.role_id };
+    const payload = {
+      sub: user._id,
+      username: user.username,
+      role: user.global_role_id,
+    };
+
     return {
       access_token: this.jwtService.sign(payload),
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.global_role_id,
+      },
     };
   }
   async sendResetOtp(email: string) {

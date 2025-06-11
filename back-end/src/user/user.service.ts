@@ -160,4 +160,22 @@ export class UserService {
 
     return { message: 'Friend request accepted successfully' };
   }
+  async rejectFriendRequest(currentUserId: string, requesterId: string) {
+    const currentUser = await this.userModel.findById(currentUserId);
+    if (!currentUser) {
+      throw new Error('Current user not found');
+    }
+
+    if (!currentUser.acceptFriend.includes(requesterId)) {
+      throw new Error('No friend request from this user to reject');
+    }
+
+    currentUser.acceptFriend = currentUser.acceptFriend.filter(
+      (id) => id !== requesterId,
+    );
+
+    await currentUser.save();
+
+    return { message: 'Friend request rejected successfully' };
+  }
 }

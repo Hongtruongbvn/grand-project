@@ -119,4 +119,12 @@ export class UserController {
   ) {
     return this.userService.acceptFriendRequest(req.user._id, requesterId);
   }
+  @UseGuards(JwtAuthGuard)
+  @Post('friend/reject/:requesterId')
+  async rejectFriendRequest(
+    @Param('requesterId') requesterId: string,
+    @Req() req: any,
+  ) {
+    return this.userService.rejectFriendRequest(req.user.userId, requesterId);
+  }
 }

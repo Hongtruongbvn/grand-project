@@ -12,5 +12,6 @@ import { GlobalRole, GlobalRoleSchema } from './schema/global-role.schema';
   ],
   controllers: [GlobalRoleController],
   providers: [GlobalRoleService],
+  exports: [GlobalRoleService],
 })
 export class GlobalRoleModule {}

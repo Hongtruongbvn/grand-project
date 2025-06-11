@@ -1,26 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { CreateGlobalRoleDto } from './dto/create-global-role.dto';
 import { UpdateGlobalRoleDto } from './dto/update-global-role.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { GlobalRole } from './schema/global-role.schema';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class GlobalRoleService {
+  constructor(
+    @InjectModel(GlobalRole.name) private globalRoleModel: Model<GlobalRole>,
+  ) {}
   create(createGlobalRoleDto: CreateGlobalRoleDto) {
-    return 'This action adds a new globalRole';
+    const createdGlobalRole = new this.globalRoleModel(createGlobalRoleDto);
+    return createdGlobalRole.save();
   }
-
-  findAll() {
-    return `This action returns all globalRole`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} globalRole`;
-  }
-
-  update(id: number, updateGlobalRoleDto: UpdateGlobalRoleDto) {
-    return `This action updates a #${id} globalRole`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} globalRole`;
+  findByName(name: string): Promise<GlobalRole | null> {
+    return this.globalRoleModel.findOne({ name }).exec();
   }
 }

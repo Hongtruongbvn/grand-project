@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { CreateGlobalRoleDto } from './dto/create-global-role.dto';
-import { UpdateGlobalRoleDto } from './dto/update-global-role.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { GlobalRole } from './schema/global-role.schema';
 import { Model } from 'mongoose';

@@ -17,6 +17,9 @@ import { TypeModule } from './type/type.module';
 import { InterestModule } from './interest/interest.module';
 
 import { ConfigModule } from '@nestjs/config';
+import { GroupModule } from './group/group.module';
+import { GroupRoleModule } from './group-role/group-role.module';
+import { GroupMemberModule } from './group-member/group-member.module';
 
 @Module({
   imports: [
@@ -38,6 +41,9 @@ import { ConfigModule } from '@nestjs/config';
     MessageModule,
     ChatroomModule,
     GlobalRoleModule,
+    GroupModule,
+    GroupRoleModule,
+    GroupMemberModule,
   ],
   controllers: [AppController],
   providers: [AppService],

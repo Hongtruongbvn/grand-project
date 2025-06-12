@@ -9,7 +9,6 @@ import { PostModule } from './post/post.module';
 import { CommentModule } from './comment/comment.module';
 import { ReportModule } from './report/report.module';
 import { BlockModule } from './block/block.module';
-import { GroupModule } from './group/group.module';
 import { StoryModule } from './story/story.module';
 import { MessageModule } from './message/message.module';
 import { ChatroomModule } from './chatroom/chatroom.module';
@@ -22,7 +21,7 @@ import { ConfigModule } from '@nestjs/config';
 @Module({
   imports: [
     ConfigModule.forRoot({
-       isGlobal: true,
+      isGlobal: true,
     }),
     MongooseModule.forRoot(process.env.MONGOOSE as string),
 
@@ -35,7 +34,6 @@ import { ConfigModule } from '@nestjs/config';
     InterestModule,
     ReportModule,
     BlockModule,
-    GroupModule,
     StoryModule,
     MessageModule,
     ChatroomModule,

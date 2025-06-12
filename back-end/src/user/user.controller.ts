@@ -108,7 +108,7 @@ export class UserController {
   async sendFriendRequest(
     @Param('toUserId') toUserId: string,
     @Request() req: any,
-  ) {
+  ) { 
     const fromUserId = req.user.userId; // 👈 lấy userId hiện tại từ token
     return this.userService.sendFriendRequest(fromUserId, toUserId);
   }

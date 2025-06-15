@@ -1,35 +1,52 @@
-// src/pages/Login.tsx
 import { useState } from "react";
-import { login } from "../../Api/Auth";
-import AuthFormWrapper from "../../Components/AuthFormWrapper";
+import { login } from "../../../Api/Auth";
+import AuthFormWrapper from "../../../Components/AuthFormWrapper";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import styles from "./Login.module.scss";
 
 export default function Login() {
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-  });
+  const [form, setForm] = useState({ email: "", password: "" });
   const [err, setErr] = useState("");
+  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  try {
-    const data = await login({ email: form.email, password: form.password });
-    console.log("Login response:", data);  // Xem dữ liệu nhận được
-    localStorage.setItem("token", data.token); // Hoặc data.accessToken nếu khác key
-    navigate("/home");
-  } catch (err: any) {
-    console.error("Login error:", err);
-    setErr(err.message || "Đăng nhập thất bại");
-  }
-};
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErr("");
+    setSuccess("");
+    setLoading(true);
+
+    try {
+      const data = await login({ email: form.email, password: form.password });
+
+      localStorage.setItem("token", data.access_token);
+      localStorage.setItem("userId", data.user._id);
+      localStorage.setItem("user", JSON.stringify(data.user)); // ✅ Lưu full user
+
+      setSuccess("✅ Đăng nhập thành công! Đang chuyển hướng...");
+
+      const hasInterests = data.user.interests && data.user.interests.length > 0;
+
+      setTimeout(() => {
+        if (hasInterests) {
+          navigate("/home");
+        } else {
+          navigate("/select-interest");
+        }
+      }, 3000);
+    } catch (error: any) {
+      console.error("Login error:", error);
+      setErr(error.message || "❌ Đăng nhập thất bại");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className={styles.loginPage}>
@@ -50,30 +67,36 @@ const handleSubmit = async (e: React.FormEvent) => {
               transition={{ duration: 0.5 }}
             >
               {err && <p className={styles.errorMessage}>{err}</p>}
+              {success && <p className={styles.successMessage}>{success}</p>}
 
               <input
                 name="email"
-                type="text"
+                type="email"
                 placeholder="Email"
                 value={form.email}
                 onChange={handleChange}
                 required
+                disabled={loading}
+                autoComplete="email"
               />
               <input
                 name="password"
                 type="password"
-                autoComplete="current-password"
                 placeholder="Mật khẩu"
                 value={form.password}
                 onChange={handleChange}
                 required
+                disabled={loading}
+                autoComplete="current-password"
               />
+
               <motion.button
                 type="submit"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: loading ? 1 : 1.05 }}
+                whileTap={{ scale: loading ? 1 : 0.95 }}
+                disabled={loading}
               >
-                Đăng Nhập
+                {loading ? "Đang chuyển hướng..." : "Đăng Nhập"}
               </motion.button>
 
               <div className={styles.links}>

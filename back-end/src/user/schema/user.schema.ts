@@ -42,7 +42,7 @@ export class User extends Document {
   @Prop({ type: Types.ObjectId, ref: 'Type' })
   type_id: Types.ObjectId[];
 
-  @Prop({ type: Types.ObjectId, ref: 'Interest' })
+  @Prop({ type: [Types.ObjectId], ref: 'Interest', default: [] }) //sửa cho hiện nhiều sở thích thay vì 1
   interest_id: Types.ObjectId[];
 
   @Prop({ type: Types.ObjectId, ref: 'User' })

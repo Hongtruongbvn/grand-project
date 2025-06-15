@@ -1,0 +1,248 @@
+@use "../../Style/Theme.scss" as theme;
+
+.interestPage {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(to right, #e3f2a5, #a8d8a2);
+  font-family: Arial, sans-serif;
+
+  .card {
+    width: 90%;
+    max-width: 1000px;
+    min-height: 600px;
+    display: flex;
+    border-radius: 1.1rem;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    background-color: white;
+    opacity: 0;
+    animation: fadeInUp 0.6s ease-out forwards;
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.4s ease;
+
+    &:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 30px rgba(31, 94, 71, 0.25);
+    }
+
+    .left {
+      flex: 1.2;
+      background: linear-gradient(rgba(44, 125, 95, 0.7), rgba(31, 94, 71, 0.9)),
+        url("https://images.pexels.com/photos/3228727/pexels-photo-3228727.jpeg?auto=compress&cs=tinysrgb&w=1600")
+          center / cover no-repeat;
+      padding: 50px;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 30px;
+      text-align: center;
+
+      h1 {
+        font-size: 60px;
+        line-height: 1.1;
+        font-weight: bold;
+      }
+
+      p {
+        font-size: 18px;
+        max-width: 400px;
+      }
+    }
+
+    .right {
+      flex: 1;
+      padding: 50px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+
+      h2 {
+        margin-bottom: 20px;
+        font-size: 28px;
+        color: #1f5e47;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 15px;
+        width: 100%;
+        max-width: 500px;
+        margin-bottom: 30px;
+
+        .interestItem {
+          background-color: #e3f2a5;
+          border: 1px solid #c5d47e;
+          padding: 10px;
+          text-align: center;
+          border-radius: 10px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          font-weight: 500;
+
+          &:hover {
+            background-color: #f1f8c9;
+            box-shadow: 0 2px 6px rgba(31, 94, 71, 0.15);
+          }
+
+          &.selected {
+            background-color: #1f5e47;
+            color: white;
+            font-weight: bold;
+            border: none;
+          }
+
+          .tag {
+            cursor: pointer;
+            display: block;
+            font-size: 12px;
+            margin-top: 5px;
+            color: black;
+          }
+          &.selected .tag {
+            color: white;
+            font-weight: bold;
+            border: none;
+          }
+        }
+      }
+
+      // Trong InterestSelection.module.scss
+
+      .errorMessage {
+        color: #e74c3c;
+        font-weight: 500;
+        margin-bottom: 10px;
+        text-align: center;
+      }
+
+      .successMessage {
+        color: #2ecc71;
+        font-weight: 500;
+        margin-bottom: 10px;
+        text-align: center;
+      }
+
+      button {
+        padding: 12px 24px;
+        background-color: #1f5e47;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        box-shadow: 0 4px 8px rgba(31, 94, 71, 0.4);
+        transition: background-color 0.3s ease, transform 0.2s ease;
+
+        &:hover {
+          background-color: #174c3a;
+          transform: scale(1.05);
+        }
+
+        &:active {
+          transform: scale(0.95);
+        }
+
+        &:disabled {
+          background-color: gray;
+          cursor: not-allowed;
+        }
+      }
+    }
+  }
+
+  .submitButton {
+    width: 100%;
+    padding: 12px;
+    background-color: #2e7d32;
+    color: white;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+
+    &:disabled {
+      background-color: #bdbdbd;
+      cursor: not-allowed;
+    }
+
+    &:hover:not(:disabled) {
+      background-color: #1b5e20;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .card {
+      flex-direction: column;
+      min-height: auto;
+
+      .left,
+      .right {
+        width: 100%;
+        padding: 20px;
+        flex: unset;
+      }
+
+      .left {
+        height: 200px;
+        align-items: center;
+        text-align: center;
+
+        h1 {
+          font-size: 32px;
+        }
+      }
+    }
+  }
+
+  @media (max-width: 480px) {
+    .card {
+      .left {
+        padding: 15px;
+
+        h1 {
+          font-size: 24px;
+        }
+
+        p {
+          font-size: 0.9rem;
+        }
+      }
+
+      .right {
+        padding: 20px;
+
+        h2 {
+          font-size: 20px;
+        }
+
+        .grid {
+          gap: 10px;
+        }
+
+        button {
+          padding: 10px;
+          font-size: 0.95rem;
+        }
+      }
+    }
+  }
+}
+
+// Animation giống trang Login
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

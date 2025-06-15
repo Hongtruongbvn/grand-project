@@ -1,25 +1,24 @@
 import styles from "./Home.module.scss";
-import Group from "../Group/Group";
-import Friend from "../Friend/Friend";
+import Navbar from "../../Components/navbar/Navbar";
+import FriendList from "../Friend/FriendList";
 
 const Home = () => {
   return (
-    <div className={styles.home}>
-      <div className={styles.layout}>
-        <div className={styles.leftSidebar}>
-          <Group />
+    <div className={styles.homePage}>
+      <Navbar />
+      <div className={styles.card}>
+        <div className={styles.left}>
+          <h1>Group</h1>
+          <p>Danh sách nhóm sẽ hiển thị tại đây.</p>
         </div>
 
-        <div className={styles.mainContent}>
-          <div className={styles.feed}>
-            <h2>Main Feed</h2>
-            <p>Share moments, thoughts, photos...</p>
-            {/* Có thể thêm component như: CreatePost, Stories, PostList */}
-          </div>
+        <div className={styles.middle}>
+          <h1>Main Feed</h1>
+          <p>Nội dung chính của bảng tin sẽ hiển thị ở đây.</p>
         </div>
 
-        <div className={styles.rightSidebar}>
-          <Friend />
+        <div className={styles.right}>
+          <FriendList />
         </div>
       </div>
     </div>

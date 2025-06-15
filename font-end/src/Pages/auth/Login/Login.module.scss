@@ -6,32 +6,24 @@
   background: linear-gradient(to right, #e3f2a5, #a8d8a2);
   font-family: Arial, sans-serif;
 
-.card {
-  width: 90%;
-  max-width: 1000px;
-  min-height: 600px;
-  display: flex;
-  border-radius: 1.1rem;
-  overflow: hidden;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  background-color: white;
+  .card {
+    width: 90%;
+    max-width: 1000px;
+    min-height: 600px;
+    display: flex;
+    border-radius: 1.1rem;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    background-color: white;
+    opacity: 0;
+    animation: fadeInUp 0.6s ease-out forwards;
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.4s ease;
 
-  /* Xóa transform translateY khỏi đây */
-  opacity: 0;
-
-  /* Animation load trang */
-  animation: fadeInUp 0.6s ease-out forwards;
-
-  /* transition mượt */
-  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
-              box-shadow 0.4s ease;
-
-  &:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 15px 30px rgba(31, 94, 71, 0.25);
-  }
-
-
+    &:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 30px rgba(31, 94, 71, 0.25);
+    }
 
     .left {
       flex: 1.2;
@@ -99,15 +91,12 @@
         padding: 30px;
         border-radius: 12px;
         background-color: #ffffff;
-        transition: all 0.3s ease;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
 
         &:hover {
-          /* Form thì giữ scale nhẹ */
           transform: translateY(-5px) scale(1.02);
           box-shadow: 0 8px 20px rgba(31, 94, 71, 0.15);
-          transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
-                      box-shadow 0.3s ease;
         }
       }
 
@@ -116,6 +105,24 @@
         font-size: 0.9rem;
         font-weight: 600;
         margin-bottom: 10px;
+        margin-top: -5px;
+        margin-bottom: 10px;
+      }
+
+      button[type="submit"] {
+        margin-top: 5px;
+      }
+      .successMessage {
+        color: #1f7a54;
+        background-color: #dcfce7;
+        font-size: 0.9rem;
+        font-weight: 600;
+        padding: 10px 12px;
+        border-radius: 6px;
+        border: 1px solid #b6e4c7;
+        margin-bottom: 10px;
+        text-align: center;
+        animation: fadeSuccess 0.5s ease-in-out;
       }
 
       input {
@@ -199,7 +206,7 @@
     }
   }
 
-  /* Responsive */
+  // Tablet và mobile
   @media (max-width: 768px) {
     .card {
       flex-direction: column;
@@ -223,9 +230,61 @@
       }
     }
   }
+
+  // Điện thoại nhỏ
+  @media (max-width: 480px) {
+    .card {
+      .left {
+        padding: 15px;
+
+        h1 {
+          font-size: 24px;
+        }
+
+        p {
+          font-size: 0.9rem;
+        }
+
+        .buttonsRegister {
+          button {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+          }
+        }
+      }
+
+      .right {
+        padding: 20px;
+
+        form {
+          width: 100%;
+          padding: 15px;
+          border-radius: 10px;
+        }
+
+        input {
+          font-size: 0.95rem;
+          padding: 10px;
+        }
+
+        button[type="submit"] {
+          font-size: 1rem;
+          padding: 10px;
+        }
+
+        .links {
+          font-size: 1rem;
+        }
+        .links::before {
+          font-weight: 500;
+          color: #555;
+        }
+      }
+    }
+  }
 }
 
-/* Keyframes cho hiệu ứng load trang */
+// Animation cho trang load
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -234,5 +293,16 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes fadeSuccess {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
   }
 }

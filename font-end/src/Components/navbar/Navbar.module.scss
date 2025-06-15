@@ -1,0 +1,39 @@
+.navbar {
+  height: 60px;
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.logo {
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: #333;
+  cursor: pointer;
+}
+
+.searchInput {
+  width: 40%;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+}
+
+.profile {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  margin-right: 10px;
+}

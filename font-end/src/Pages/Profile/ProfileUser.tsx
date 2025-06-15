@@ -1,7 +1,9 @@
+// ProfileUser.tsx
 import { useEffect, useState } from "react";
 import { FaMapMarkerAlt, FaGlobe, FaUserAlt } from "react-icons/fa";
 import { MdOutlineCake } from "react-icons/md";
 import { GiThreeFriends } from "react-icons/gi";
+import { useNavigate } from "react-router-dom";
 import styles from "./ProfileUser.module.scss";
 
 export interface UserProfile {
@@ -9,7 +11,7 @@ export interface UserProfile {
   avatar?: string;
   bio?: string;
   age?: number;
-  interests?: string[];
+  interests: string[];
   location?: string;
   statusMessage?: string;
   website?: string;
@@ -18,38 +20,31 @@ export interface UserProfile {
 export default function ProfileUser() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
-useEffect(() => {
-  const fetchProfile = async () => {
-    const token = localStorage.getItem("token");
-    console.log("Token lấy từ localStorage:", token);
-
-    try {
-      const res = await fetch("http://localhost:3000/users/profile", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(`Không thể lấy thông tin người dùng, status: ${res.status}, message: ${errorText}`);
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const token = localStorage.getItem("token");
+      try {
+        const res = await fetch("http://localhost:9090/users/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        setUser({
+          ...data,
+          interests: Array.isArray(data.interests)
+            ? data.interests.map((i: any) => i.name || i)
+            : [],
+        });
+      } catch (error) {
+        console.error("Lỗi khi lấy thông tin user:", error);
+      } finally {
+        setLoading(false);
       }
+    };
 
-      const data = await res.json();
-      setUser({
-        ...data,
-        interests: Array.isArray(data.interests) ? data.interests : [],
-      });
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchProfile();
-}, []);
+    fetchProfile();
+  }, []);
 
   if (loading) return <div className={styles.loading}>Đang tải...</div>;
   if (!user) return <div className={styles.error}>Không tìm thấy người dùng</div>;
@@ -65,6 +60,9 @@ useEffect(() => {
           />
           <h2>{user.username}</h2>
           {user.statusMessage && <p className={styles.status}>{user.statusMessage}</p>}
+          <button className={styles.editBtn} onClick={() => navigate("/edit-profile")}>
+            Chỉnh sửa hồ sơ
+          </button>
         </div>
 
         <div className={styles.infoGrid}>
@@ -94,7 +92,7 @@ useEffect(() => {
               </a>
             </div>
           )}
-          {Array.isArray(user.interests) && user.interests.length > 0 && (
+          {user.interests?.length > 0 && (
             <div className={styles.infoItem}>
               <GiThreeFriends />
               <span>Sở thích: {user.interests.join(", ")}</span>

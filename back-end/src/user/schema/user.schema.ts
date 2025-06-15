@@ -59,6 +59,10 @@ export class User extends Document {
 
   @Prop()
   resetPasswordOtpExpiry?: Date;
+
+  @Prop()
+  pendingNewEmail?: string;
+
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

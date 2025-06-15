@@ -17,7 +17,6 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { AuthGuard } from '@nestjs/passport';
 import { Types } from 'mongoose';
 
 @Controller('users')
@@ -128,4 +127,24 @@ export class UserController {
   ) {
     return this.userService.rejectFriendRequest(req.user.userId, requesterId);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('email/request-change')
+  async requestEmailChange(
+    @Request() req,
+    @Body('newEmail') newEmail: string,
+  ) {
+    return this.userService.requestEmailChange(req.user.userId, newEmail);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('email/confirm-change')
+  async confirmEmailChange(
+    @Request() req,
+    @Body('otp') otp: string,
+  ) {
+    return this.userService.confirmEmailChange(req.user.userId, otp);
+  }
+
+
 }

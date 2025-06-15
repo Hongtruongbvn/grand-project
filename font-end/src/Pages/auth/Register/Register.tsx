@@ -1,34 +1,45 @@
+// src/pages/Register/Register.tsx
 import { useState } from "react";
-import { register } from "../../Api/Auth";
-import AuthFormWrapper from "../../Components/AuthFormWrapper";
+import type { CreateUserDto } from "../../../types/user";
+import { register } from "../../../Api/Auth";
+import AuthFormWrapper from "../../../Components/AuthFormWrapper";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import styles from "./Register.module.scss";
 
+type FormEvent = React.ChangeEvent<HTMLInputElement | HTMLSelectElement>;
+
 export default function Register() {
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<Partial<CreateUserDto>>({
     username: "",
     email: "",
     password: "",
-    address: "",
+    gender: undefined,
   });
   const [err, setErr] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e: FormEvent) => {
+    const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErr("");
+    setSuccess("");
     setLoading(true);
+
     try {
-      await register(form);
-      navigate("/login");
-    } catch (err: any) {
-      setErr(err.response?.data?.message || err.message || "Đăng ký thất bại");
+      // Chuyển form thành CreateUserDto
+      const res = await register(form as CreateUserDto);
+      setSuccess(res.message || "Đăng ký thành công!");
+      setTimeout(() => navigate("/login"), 1500);
+    } catch (error: any) {
+      console.error("Register error:", error);
+      setErr(error.message || "Đăng ký thất bại");
     } finally {
       setLoading(false);
     }
@@ -56,31 +67,47 @@ export default function Register() {
               transition={{ duration: 0.5 }}
             >
               {err && <p className={styles.errorMessage}>⚠ {err}</p>}
+              {success && <p className={styles.successMessage}>{success}</p>}
 
               <input
                 name="username"
                 type="text"
                 placeholder="Tên người dùng"
-                value={form.username}
+                value={form.username || ""}
                 onChange={handleChange}
                 required
+                autoComplete="username"
               />
               <input
                 name="email"
                 type="email"
                 placeholder="Email"
-                value={form.email}
+                value={form.email || ""}
                 onChange={handleChange}
                 required
+                autoComplete="email"
               />
               <input
                 name="password"
                 type="password"
                 placeholder="Mật khẩu"
-                value={form.password}
+                value={form.password || ""}
                 onChange={handleChange}
                 required
+                autoComplete="new-password"
               />
+              <select
+                name="gender"
+                value={form.gender || ""}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Chọn giới tính</option>
+                <option value="male">Nam</option>
+                <option value="female">Nữ</option>
+                <option value="other">Khác</option>
+              </select>
+
               <motion.button
                 type="submit"
                 whileHover={{ scale: 1.05 }}

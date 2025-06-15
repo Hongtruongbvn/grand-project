@@ -1,27 +1,37 @@
-const API = "http://localhost:3000";
+import type { CreateUserDto } from '../types/user';
+const API = "http://localhost:9090";
 
-export const login = async (data: { email: string; password: string }) => {
-  const res = await fetch(`${API}/auth/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
+export const register = async (dto: CreateUserDto) => {
+  const res = await fetch('http://localhost:9090/users/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(dto),
   });
-  if (!res.ok) throw new Error("Đăng Nhập thất bại");
+  if (!res.ok) throw new Error('Register failed');
   return res.json();
 };
 
-export const register = async (data: {
-  username: string;
-  email: string;
-  password: string;
-}) => {
-  const res = await fetch(`${API}/users/register`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
+export const login = async ({ email, password }: { email: string; password: string }) => {
+  const res = await fetch(`${API}/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
   });
-  if (!res.ok) throw new Error("Đăng Ký thất bại");
-  return res.json();
+
+  if (!res.ok) throw new Error('Login failed');
+
+  const data = await res.json();
+
+  // ✅ Lưu token để dùng cho các request cần Authorization
+  localStorage.setItem('accessToken', data.access_token);
+
+  // ✅ Lưu userId nếu bạn cần sử dụng sau
+  localStorage.setItem('userId', data.user.id); // chú ý là id, không phải _id
+
+  // (Tuỳ chọn) lưu toàn bộ user
+  localStorage.setItem('user', JSON.stringify(data.user));
+
+  return data;
 };
 
 export const forgotPassword = async (email: string) => {

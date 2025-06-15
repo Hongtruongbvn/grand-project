@@ -1,16 +1,14 @@
-// src/pages/ResetPassword/ResetPassword.tsx
 import { useState } from "react";
-import { resetPassword } from "../../Api/Auth";
-import AuthFormWrapper from "../../Components/AuthFormWrapper";
+import { verifyOtp } from "../../Api/Auth";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import styles from "./ResetPassword.module.scss";
+import AuthFormWrapper from "../../Components/AuthFormWrapper";
+import styles from "./VerifyOtp.module.scss";
 
-export default function ResetPassword() {
+export default function VerifyOtp() {
   const location = useLocation();
   const email = location.state?.email || "";
-  const token = location.state?.token || "";
-  const [newPassword, setNewPassword] = useState("");
+  const [otp, setOtp] = useState("");
   const [err, setErr] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,40 +19,49 @@ export default function ResetPassword() {
     setErr("");
     setSuccess("");
     setLoading(true);
+
     try {
-      await resetPassword(email, token, newPassword);
-      setSuccess("✅ Mật khẩu đã được đặt lại thành công!");
-      setTimeout(() => navigate("/login"), 3000);
+      const res = await verifyOtp(email, otp);
+      setSuccess("✅ Xác thực thành công! Đang chuyển hướng...");
+      setTimeout(() => {
+        navigate("/reset-password", {
+          state: {
+            email,
+            token: res.resetToken,
+          },
+        });
+      }, 2500);
     } catch (error: any) {
-      setErr(error.message || "❌ Đặt lại mật khẩu thất bại");
+      setErr(error.message || "❌ OTP không hợp lệ");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className={styles.resetPage}>
+    <div className={styles.verifyPage}>
       <div className={styles.card}>
         <div className={styles.left}>
-          <h1>Đặt lại mật khẩu</h1>
-          <p>Hãy tạo một mật khẩu mới mạnh mẽ để bảo vệ tài khoản của bạn.</p>
+          <h1>Xác thực OTP</h1>
+          <p>Nhập mã OTP đã được gửi tới email của bạn để tiếp tục.</p>
         </div>
+
         <div className={styles.right}>
-          <AuthFormWrapper title="Đặt lại mật khẩu">
+          <AuthFormWrapper title="Nhập mã OTP">
             <motion.form
               onSubmit={handleSubmit}
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
+              transition={{ duration: 0.4 }}
             >
               {err && <p className={styles.errorMessage}>{err}</p>}
               {success && <p className={styles.successMessage}>{success}</p>}
 
               <input
-                type="password"
-                placeholder="Mật khẩu mới"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
+                type="text"
+                placeholder="Nhập mã OTP"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
                 required
                 disabled={loading}
               />
@@ -65,7 +72,7 @@ export default function ResetPassword() {
                 whileTap={{ scale: loading ? 1 : 0.95 }}
                 disabled={loading}
               >
-                {loading ? "Đang đặt lại..." : "Xác nhận"}
+                {loading ? "Đang kiểm tra..." : "Xác thực OTP"}
               </motion.button>
             </motion.form>
           </AuthFormWrapper>

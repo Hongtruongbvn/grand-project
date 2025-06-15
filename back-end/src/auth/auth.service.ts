@@ -17,7 +17,10 @@ export class AuthService {
   ) {}
 
   async validateUser(email: string, pass: string): Promise<any> {
-    const user = await this.userModel.findOne({ email });
+    const user = await this.userModel
+      .findOne({ email })
+      .populate('interest_id'); // 👈 THÊM DÒNG NÀY
+
     if (user && (await bcrypt.compare(pass, user.password))) {
       const { password, ...result } = user.toObject();
       return result;
@@ -39,6 +42,7 @@ export class AuthService {
         username: user.username,
         email: user.email,
         role: user.global_role_id,
+        interests: user.interest_id ?? [],
       },
     };
   }

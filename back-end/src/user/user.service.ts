@@ -187,4 +187,12 @@ export class UserService {
 
     return { message: 'Friend request rejected successfully' };
   }
+
+  //Thêm vô để logic trang login và sở thích
+  async findByEmailWithInterests(email: string): Promise<User | null> {
+    return this.userModel
+      .findOne({ email })
+      .select('-password')
+      .populate('interest_id'); // 👈 Đây là điểm mấu chốt
+  }
 }

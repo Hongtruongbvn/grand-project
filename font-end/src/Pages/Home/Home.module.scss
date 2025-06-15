@@ -1,51 +1,131 @@
-@use "../../Style/Theme.scss" as theme;
+.homePage {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(to right, #e3f2a5, #a8d8a2);
+  font-family: Arial, sans-serif;
 
-.home {
-  padding: 20px 60px;
-  background-color: #e3f2a5; // nền rất nhạt và tươi
+  .card {
+    width: 90%;
+    max-width: 1200px;
+    min-height: 600px;
+    display: flex;
+    margin: auto;
+    border-radius: 1.1rem;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    background-color: white;
+    opacity: 0;
+    animation: fadeInUp 0.6s ease-out forwards;
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s ease;
 
-  min-height: 100vh;
-
-  @include theme.mobile {
-    padding: 10px;
-  }
-
-  .layout {
-    display: grid;
-    grid-template-columns: 1.5fr 3fr 1.5fr;
-    gap: 24px;
-    margin-top: 40px;
-
-    @include theme.tablet {
-      grid-template-columns: 1fr;
+    &:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 30px rgba(31, 94, 71, 0.25);
     }
 
-    .leftSidebar,
-    .rightSidebar,
-    .mainContent {
-      background-color: #a8d8a2; // block content màu xanh nhạt
-      padding: 1rem;
-      border-radius: 20px;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-      color: #1f5e47; // text màu xanh đậm
-
-      transition: background-color 0.3s ease;
+    .left,
+    .middle,
+    .right {
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 20px;
     }
 
-    .feed {
+    .left {
+      flex: 1;
+      background: linear-gradient(rgba(44, 125, 95, 0.7), rgba(31, 94, 71, 0.9)),
+        url("https://images.pexels.com/photos/3228727/pexels-photo-3228727.jpeg?auto=compress&cs=tinysrgb&w=1600")
+        center / cover no-repeat;
+      color: white;
       text-align: center;
 
-      h2 {
-        font-size: 22px;
-        font-weight: 700;
-        color: #2c7d5f;
-        margin-bottom: 12px;
+      h1 {
+        font-size: 2rem;
+        font-weight: bold;
       }
 
       p {
-        color: #4b9a73;
+        font-size: 1rem;
+        line-height: 1.5;
+      }
+    }
+
+    .middle {
+      flex: 2;
+      background-color: #ffffff;
+
+      h1 {
+        font-size: 2rem;
+        color: #1f5e47;
+      }
+
+      p {
+        color: #555;
+        margin-top: 10px;
+      }
+    }
+
+    .right {
+      flex: 1;
+      background-color: #ffffff;
+
+      h1 {
+        font-size: 1.8rem;
+        color: #1f5e47;
+        margin-bottom: 15px;
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    .card {
+      flex-direction: column;
+      min-height: auto;
+
+      .left,
+      .middle,
+      .right {
+        width: 100%;
+        padding: 20px;
+        text-align: center;
+      }
+
+      .left {
+        height: 200px;
+
+        h1 {
+          font-size: 1.5rem;
+        }
+
+        p {
+          font-size: 0.9rem;
+        }
+      }
+
+      .middle,
+      .right {
+        h1 {
+          font-size: 1.4rem;
+        }
+
+        p {
+          font-size: 1rem;
+        }
       }
     }
   }
 }
 
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -12,6 +12,7 @@ import {
   Query,
   Param,
   Req,
+  Delete,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -107,7 +108,7 @@ export class UserController {
   async sendFriendRequest(
     @Param('toUserId') toUserId: string,
     @Request() req: any,
-  ) { 
+  ) {
     const fromUserId = req.user.userId; // 👈 lấy userId hiện tại từ token
     return this.userService.sendFriendRequest(fromUserId, toUserId);
   }
@@ -127,24 +128,21 @@ export class UserController {
   ) {
     return this.userService.rejectFriendRequest(req.user.userId, requesterId);
   }
+  @UseGuards(JwtAuthGuard)
+  @Delete('friend/remove/:friendId')
+  async removeFriend(@Param('friendId') friendId: string, @Req() req: any) {
+    return this.userService.removeFriend(req.user.userId, friendId);
+  }
 
   @UseGuards(JwtAuthGuard)
   @Post('email/request-change')
-  async requestEmailChange(
-    @Request() req,
-    @Body('newEmail') newEmail: string,
-  ) {
+  async requestEmailChange(@Request() req, @Body('newEmail') newEmail: string) {
     return this.userService.requestEmailChange(req.user.userId, newEmail);
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('email/confirm-change')
-  async confirmEmailChange(
-    @Request() req,
-    @Body('otp') otp: string,
-  ) {
+  async confirmEmailChange(@Request() req, @Body('otp') otp: string) {
     return this.userService.confirmEmailChange(req.user.userId, otp);
   }
-
-
 }

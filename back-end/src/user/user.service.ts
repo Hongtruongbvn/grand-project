@@ -7,6 +7,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { GlobalRoleService } from 'src/global-role/global-role.service';
 import { InterestService } from 'src/interest/interest.service';
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class UserService {
@@ -14,6 +15,7 @@ export class UserService {
     @InjectModel(User.name) private userModel: Model<User>,
     private readonly globalRoleService: GlobalRoleService,
     private readonly interestService: InterestService,
+    private readonly mailService: MailService,
   ) {}
   async register(createUserDto: CreateUserDto): Promise<User> {
     try {
@@ -200,4 +202,58 @@ async findById(userId: string) {
       .select('-password')
       .populate('interest_id'); // 👈 Đây là điểm mấu chốt
   }
+
+  async requestEmailChange(userId: string, newEmail: string) {
+    const user = await this.userModel.findById(userId);
+      if (!user) throw new BadRequestException('Người dùng không tồn tại');
+
+  // Kiểm tra email mới đã tồn tại chưa
+    const emailExists = await this.userModel.findOne({ email: newEmail });
+      if (emailExists) throw new BadRequestException('Email mới đã được sử dụng');
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiry = new Date(Date.now() + 15 * 60 * 1000); // 15 phút
+
+  // Gửi mã OTP tới email hiện tại
+    await this.mailService.sendMail(
+      user.email,
+      'Xác nhận đổi email',
+      `Mã OTP để xác nhận đổi email: ${otp}. Mã có hiệu lực trong 15 phút.`,
+  );
+
+  // Lưu thông tin xác thực
+    await this.userModel.findByIdAndUpdate(userId, {
+      resetPasswordOtp: otp,
+      resetPasswordOtpExpiry: expiry,
+      pendingNewEmail: newEmail,
+    });
+
+    return { message: 'OTP xác nhận đã gửi đến email hiện tại' };
+    }
+
+  async confirmEmailChange(userId: string, otp: string) {
+    const user = await this.userModel.findById(userId);
+      if (
+        !user ||
+        !user.pendingNewEmail ||
+        user.resetPasswordOtp !== otp ||
+        !user.resetPasswordOtpExpiry ||
+        new Date() > user.resetPasswordOtpExpiry
+    ) {
+    throw new BadRequestException('OTP không hợp lệ hoặc đã hết hạn');
+    }
+
+    user.email = user.pendingNewEmail;
+    user.pendingNewEmail = undefined;
+    user.resetPasswordOtp = undefined;
+    user.resetPasswordOtpExpiry = undefined;
+    await user.save();
+
+    return { message: 'Email đã được cập nhật thành công' };
+  }
+
+
+
+
+
 }

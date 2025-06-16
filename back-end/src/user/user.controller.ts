@@ -11,6 +11,7 @@ import {
   HttpStatus,
   Query,
   Param,
+  NotFoundException, //nam thêm
   Req,
 } from '@nestjs/common';
 import { UserService } from './user.service';
@@ -127,5 +128,20 @@ export class UserController {
     @Req() req: any,
   ) {
     return this.userService.rejectFriendRequest(req.user.userId, requesterId);
+  }
+
+  // ===== THÊM ENDPOINT MỚI NÀY VÀO ĐỂ SỬA LỖI LOGIC ===== Nam thêm
+  @UseGuards(JwtAuthGuard) // Bảo vệ endpoint này
+  @Get(':id')
+  async getUserById(@Param('id') id: string) {
+    // Kiểm tra xem ID có hợp lệ không trước khi gọi service
+    if (!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException('ID người dùng không hợp lệ');
+    }
+    const user = await this.userService.findById(id);
+    if (!user) {
+      throw new NotFoundException('Không tìm thấy người dùng');
+    }
+    return { message: 'Lấy thông tin thành công', data: user };
   }
 }

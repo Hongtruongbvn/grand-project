@@ -33,4 +33,10 @@ export class GroupService {
 
     return group.save();
   }
+
+  // ===== THÊM HÀM MỚI NÀY VÀO ===== Nam thêm
+  async findAll(): Promise<Group[]> {
+    // .populate('owner', 'username') sẽ lấy cả thông tin username của người tạo nhóm
+    return this.groupModel.find().populate('owner', 'username').exec();
+  }
 }

@@ -6,7 +6,7 @@ $text-secondary: #8a8d91;
 $border-color: #e9ebee;
 
 // ===== PHẦN STYLE CHÍNH CHO WIDGET =====
-.widget { // Đổi tên class chung thành .widget
+.widget {
   background-color: #ffffff;
   border-radius: 12px;
   padding: 16px;
@@ -18,41 +18,27 @@ $border-color: #e9ebee;
   flex-direction: column;
 
   h3 {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 0 0 16px 0;
-    padding-bottom: 12px;
-    text-align: center;
-    justify-content: center;
-    font-size: 1.2rem;
-    color: $primary-green-dark;
+    display: flex; align-items: center; gap: 10px;
+    margin: 0 0 16px 0; padding-bottom: 12px;
+    text-align: center; justify-content: center;
+    font-size: 1.2rem; color: $primary-green-dark;
     border-bottom: 1px solid $border-color;
   }
 }
 
 .list {
-  list-style: none;
-  padding: 0 4px;
-  margin: 0 -4px;
-  overflow-y: auto;
-  flex-grow: 1;
+  list-style: none; padding: 0 4px; margin: 0 -4px;
+  overflow-y: auto; flex-grow: 1;
   &::-webkit-scrollbar { width: 6px; }
   &::-webkit-scrollbar-thumb { background: #d1d1d1; border-radius: 10px; }
   &::-webkit-scrollbar-thumb:hover { background: #b1b1b1; }
 }
 
-.item { // Đổi tên class chung thành .item
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 15px;
-  border-radius: 8px;
-  margin-bottom: 8px;
-  cursor: pointer;
-  background-color: $accent-green-bg;
-  color: $primary-green-dark;
-  transition: all 0.25s ease-out;
+.item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 15px; border-radius: 8px; margin-bottom: 8px;
+  cursor: pointer; background-color: $accent-green-bg;
+  color: $primary-green-dark; transition: all 0.25s ease-out;
 
   &:hover {
     background-color: $accent-green-hover;
@@ -60,25 +46,13 @@ $border-color: #e9ebee;
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
   }
 
-  // Style cho avatar trong item (nếu có)
   .avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid $primary-green-dark;
+    width: 40px; height: 40px; border-radius: 50%;
+    object-fit: cover; border: 2px solid $primary-green-dark;
   }
   
-  // Style cho tên trong item
-  .name {
-    font-weight: 600;
-  }
-
-  // Style cho thông tin phụ (số thành viên)
-  .meta {
-    font-size: 0.8rem;
-    opacity: 0.8;
-  }
+  .name { font-weight: 600; }
+  .meta { font-size: 0.8rem; opacity: 0.8; }
 }
 
 .empty {

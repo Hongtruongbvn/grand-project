@@ -35,7 +35,14 @@ export default function ForgotPassword() {
       <div className={styles.card}>
         <div className={styles.left}>
           <h1>Lấy lại mật khẩu</h1>
-          <p>Chúng tôi sẽ gửi một mã OTP vào email của bạn để đặt lại mật khẩu.</p>
+          <p>
+            Chúng tôi sẽ gửi một mã OTP vào email của bạn để đặt lại mật khẩu.
+          </p>
+          <div className={styles.footerCard}>
+            <a href="/login" className={styles.loginButton}>
+              Đăng nhập
+            </a>
+          </div>
         </div>
         <div className={styles.right}>
           <AuthFormWrapper title="Quên mật khẩu">

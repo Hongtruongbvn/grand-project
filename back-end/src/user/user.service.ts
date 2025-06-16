@@ -129,15 +129,25 @@ async findById(userId: string) {
 
     return users;
   }
-  //friend
   async sendFriendRequest(fromUserId: string, toUserId: string) {
     const toUser = await this.userModel.findById(toUserId);
+
     if (!toUser) {
       throw new Error('User to send request to not found');
     }
 
     if (toUser.acceptFriend.includes(fromUserId)) {
       throw new Error('Friend request already sent');
+    }
+    const fromObjectId = new Types.ObjectId(fromUserId);
+
+    if (toUser.friend_id.some((id) => id.equals(fromObjectId))) {
+      throw new Error('This user already your friend');
+    }
+    const toUserIdStr = (toUser._id as Types.ObjectId).toString();
+
+    if (fromUserId === toUserIdStr) {
+      throw new Error('You cannot send a friend request to yourself');
     }
 
     toUser.acceptFriend.push(fromUserId);
@@ -148,32 +158,76 @@ async findById(userId: string) {
   async acceptFriendRequest(currentUserId: string, requesterId: string) {
     const currentUser = await this.userModel.findById(currentUserId);
     const requester = await this.userModel.findById(requesterId);
+    console.log(requester);
+    console.log(currentUser);
 
     if (!currentUser || !requester) {
       throw new Error('User not found');
     }
 
-    // Xóa lời mời kết bạn
     currentUser.acceptFriend = currentUser.acceptFriend.filter(
       (id) => id !== requesterId,
     );
 
-    // Khởi tạo nếu mảng chưa có
-    if (!currentUser.friend_id) currentUser.friend_id = [];
-    if (!requester.friend_id) requester.friend_id = [];
-
-    // 👇 Ép kiểu string sang ObjectId
     const requesterObjectId = new Types.ObjectId(requesterId);
     const currentUserObjectId = new Types.ObjectId(currentUserId);
 
-    // Thêm bạn bè
-    currentUser.friend_id.push(requesterObjectId);
-    requester.friend_id.push(currentUserObjectId);
+    currentUser.friend_id = Array.from(
+      new Set([
+        ...currentUser.friend_id.map((id) => id.toString()),
+        requesterObjectId.toString(),
+      ]),
+    ).map((id) => new Types.ObjectId(id));
+
+    requester.friend_id = Array.from(
+      new Set([
+        ...requester.friend_id.map((id) => id.toString()),
+        currentUserObjectId.toString(),
+      ]),
+    ).map((id) => new Types.ObjectId(id));
 
     await currentUser.save();
     await requester.save();
 
     return { message: 'Friend request accepted' };
+  }
+  async removeFriend(currentUserId: string, friendId: string) {
+    if (
+      !Types.ObjectId.isValid(currentUserId) ||
+      !Types.ObjectId.isValid(friendId)
+    ) {
+      throw new Error('Invalid userId or friendId');
+    }
+
+    const currentUser = await this.userModel.findById(currentUserId);
+    const friendUser = await this.userModel.findById(friendId);
+
+    if (!currentUser || !friendUser) {
+      throw new Error('User not found');
+    }
+
+    const friendObjectId = new Types.ObjectId(friendId);
+    const currentUserObjectId = new Types.ObjectId(currentUserId);
+
+    currentUser.friend_id = currentUser.friend_id.filter(
+      (id) => !id.equals(friendObjectId),
+    );
+
+    friendUser.friend_id = friendUser.friend_id.filter(
+      (id) => !id.equals(currentUserObjectId),
+    );
+
+    currentUser.acceptFriend = currentUser.acceptFriend.filter(
+      (id) => id !== friendId,
+    );
+    friendUser.acceptFriend = friendUser.acceptFriend.filter(
+      (id) => id !== currentUserId,
+    );
+
+    await currentUser.save();
+    await friendUser.save();
+
+    return { message: 'Friend removed successfully' };
   }
 
   async rejectFriendRequest(currentUserId: string, requesterId: string) {
@@ -195,33 +249,29 @@ async findById(userId: string) {
     return { message: 'Friend request rejected successfully' };
   }
 
-  //Thêm vô để logic trang login và sở thích
   async findByEmailWithInterests(email: string): Promise<User | null> {
     return this.userModel
       .findOne({ email })
       .select('-password')
-      .populate('interest_id'); // 👈 Đây là điểm mấu chốt
+      .populate('interest_id');
   }
 
   async requestEmailChange(userId: string, newEmail: string) {
     const user = await this.userModel.findById(userId);
-      if (!user) throw new BadRequestException('Người dùng không tồn tại');
+    if (!user) throw new BadRequestException('Người dùng không tồn tại');
 
-  // Kiểm tra email mới đã tồn tại chưa
     const emailExists = await this.userModel.findOne({ email: newEmail });
-      if (emailExists) throw new BadRequestException('Email mới đã được sử dụng');
+    if (emailExists) throw new BadRequestException('Email mới đã được sử dụng');
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiry = new Date(Date.now() + 15 * 60 * 1000); // 15 phút
+    const expiry = new Date(Date.now() + 15 * 60 * 1000);
 
-  // Gửi mã OTP tới email hiện tại
     await this.mailService.sendMail(
       user.email,
       'Xác nhận đổi email',
       `Mã OTP để xác nhận đổi email: ${otp}. Mã có hiệu lực trong 15 phút.`,
-  );
+    );
 
-  // Lưu thông tin xác thực
     await this.userModel.findByIdAndUpdate(userId, {
       resetPasswordOtp: otp,
       resetPasswordOtpExpiry: expiry,
@@ -229,18 +279,18 @@ async findById(userId: string) {
     });
 
     return { message: 'OTP xác nhận đã gửi đến email hiện tại' };
-    }
+  }
 
   async confirmEmailChange(userId: string, otp: string) {
     const user = await this.userModel.findById(userId);
-      if (
-        !user ||
-        !user.pendingNewEmail ||
-        user.resetPasswordOtp !== otp ||
-        !user.resetPasswordOtpExpiry ||
-        new Date() > user.resetPasswordOtpExpiry
+    if (
+      !user ||
+      !user.pendingNewEmail ||
+      user.resetPasswordOtp !== otp ||
+      !user.resetPasswordOtpExpiry ||
+      new Date() > user.resetPasswordOtpExpiry
     ) {
-    throw new BadRequestException('OTP không hợp lệ hoặc đã hết hạn');
+      throw new BadRequestException('OTP không hợp lệ hoặc đã hết hạn');
     }
 
     user.email = user.pendingNewEmail;
@@ -251,9 +301,4 @@ async findById(userId: string) {
 
     return { message: 'Email đã được cập nhật thành công' };
   }
-
-
-
-
-
 }

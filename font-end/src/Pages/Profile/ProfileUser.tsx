@@ -1,41 +1,63 @@
-// ProfileUser.tsx
+// src/pages/ProfileUser/ProfileUser.tsx
 import { useEffect, useState } from "react";
-import { FaMapMarkerAlt, FaGlobe, FaUserAlt } from "react-icons/fa";
-import { MdOutlineCake } from "react-icons/md";
+import { FaMapMarkerAlt, FaUser, FaBirthdayCake, FaVenusMars } from "react-icons/fa";
+import { MdEmail } from "react-icons/md";
 import { GiThreeFriends } from "react-icons/gi";
 import { useNavigate } from "react-router-dom";
 import styles from "./ProfileUser.module.scss";
 
-export interface UserProfile {
+// Interface này khớp với dữ liệu backend trả về
+interface IUserProfile {
+  _id: string;
   username: string;
+  email: string;
   avatar?: string;
-  bio?: string;
-  age?: number;
-  interests: string[];
-  location?: string;
-  statusMessage?: string;
-  website?: string;
+  address?: string;
+  birthday?: string; // Backend trả về dạng ISO string
+  gender: 'male' | 'female' | 'other';
+  interest_id: { _id: string; name: string }[]; // Giả sử interest được populate
+  friend_id: string[];
 }
 
+// Hàm tiện ích để tính tuổi
+const calculateAge = (birthdayString?: string): number | null => {
+  if (!birthdayString) return null;
+  const birthDate = new Date(birthdayString);
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const m = today.getMonth() - birthDate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+  return age;
+};
+
 export default function ProfileUser() {
-  const [user, setUser] = useState<UserProfile | null>(null);
+  const [user, setUser] = useState<IUserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProfile = async () => {
       const token = localStorage.getItem("token");
+      if (!token) {
+        navigate("/login"); // Nếu không có token, chuyển hướng về trang login
+        return;
+      }
+      
+      setLoading(true);
       try {
         const res = await fetch("http://localhost:9090/users/me", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        const data = await res.json();
-        setUser({
-          ...data,
-          interests: Array.isArray(data.interests)
-            ? data.interests.map((i: any) => i.name || i)
-            : [],
-        });
+
+        if (!res.ok) {
+          throw new Error("Failed to fetch user profile");
+        }
+
+        const response = await res.json();
+        // Lấy dữ liệu từ response.data
+        setUser(response.data); 
       } catch (error) {
         console.error("Lỗi khi lấy thông tin user:", error);
       } finally {
@@ -44,58 +66,59 @@ export default function ProfileUser() {
     };
 
     fetchProfile();
-  }, []);
+  }, [navigate]);
 
-  if (loading) return <div className={styles.loading}>Đang tải...</div>;
-  if (!user) return <div className={styles.error}>Không tìm thấy người dùng</div>;
+  if (loading) return <div className={styles.loading}>Đang tải hồ sơ...</div>;
+  if (!user) return <div className={styles.error}>Không thể tải thông tin người dùng.</div>;
+
+  const userAge = calculateAge(user.birthday);
 
   return (
-    <div className={styles.profileUser}>
+    <div className={styles.profileUserPage}>
       <div className={styles.profileCard}>
         <div className={styles.avatarSection}>
           <img
             src={user.avatar || "/default-avatar.png"}
-            alt="avatar"
+            alt="Avatar"
             className={styles.avatar}
           />
           <h2>{user.username}</h2>
-          {user.statusMessage && <p className={styles.status}>{user.statusMessage}</p>}
+          <p className={styles.email}><MdEmail /> {user.email}</p>
           <button className={styles.editBtn} onClick={() => navigate("/edit-profile")}>
             Chỉnh sửa hồ sơ
           </button>
         </div>
 
         <div className={styles.infoGrid}>
-          {user.bio && (
-            <div className={styles.infoItem}>
-              <FaUserAlt />
-              <span>{user.bio}</span>
-            </div>
-          )}
-          {user.location && (
+          <div className={styles.infoItem}>
+            <FaUser />
+            <span><strong>Tên người dùng:</strong> {user.username}</span>
+          </div>
+          {user.address && (
             <div className={styles.infoItem}>
               <FaMapMarkerAlt />
-              <span>{user.location}</span>
+              <span><strong>Địa chỉ:</strong> {user.address}</span>
             </div>
           )}
-          {user.age && (
+           {userAge !== null && (
             <div className={styles.infoItem}>
-              <MdOutlineCake />
-              <span>{user.age} tuổi</span>
+              <FaBirthdayCake />
+              <span><strong>Tuổi:</strong> {userAge}</span>
             </div>
           )}
-          {user.website && (
-            <div className={styles.infoItem}>
-              <FaGlobe />
-              <a href={user.website} target="_blank" rel="noreferrer">
-                {user.website}
-              </a>
-            </div>
-          )}
-          {user.interests?.length > 0 && (
-            <div className={styles.infoItem}>
+          <div className={styles.infoItem}>
+            <FaVenusMars />
+            <span><strong>Giới tính:</strong> {user.gender === 'male' ? 'Nam' : user.gender === 'female' ? 'Nữ' : 'Khác'}</span>
+          </div>
+          {user.interest_id?.length > 0 && (
+            <div className={styles.infoItemFull}>
               <GiThreeFriends />
-              <span>Sở thích: {user.interests.join(", ")}</span>
+              <strong>Sở thích:</strong>
+              <div className={styles.interestTags}>
+                {user.interest_id.map((interest) => (
+                  <span key={interest._id} className={styles.tag}>{interest.name}</span>
+                ))}
+              </div>
             </div>
           )}
         </div>

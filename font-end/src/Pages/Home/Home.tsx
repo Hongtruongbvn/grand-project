@@ -1,28 +1,25 @@
 import styles from "./Home.module.scss";
-import Navbar from "../../Components/navbar/Navbar";
+import Navbar from "../../Components/navbar/navbar"; // <-- Điều chỉnh đường dẫn
 import FriendList from "../Friend/FriendList";
+import GroupList from "../Group/GroupList"; // <-- Điều chỉnh đường dẫn
 
 const Home = () => {
   return (
     <div className={styles.homePage}>
       <Navbar />
       <div className={styles.card}>
-        <div className={styles.left}>
-          <h1>Group</h1>
-          <p>Danh sách nhóm sẽ hiển thị tại đây.</p>
-        </div>
-
-        <div className={styles.middle}>
-          <h1>Main Feed</h1>
+        <aside className={styles.left}>
+          <GroupList />
+        </aside>
+        <main className={styles.middle}>
+          <h1>Bảng tin</h1>
           <p>Nội dung chính của bảng tin sẽ hiển thị ở đây.</p>
-        </div>
-
-        <div className={styles.right}>
+        </main>
+        <aside className={styles.right}>
           <FriendList />
-        </div>
+        </aside>
       </div>
     </div>
   );
 };
-
 export default Home;

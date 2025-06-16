@@ -67,13 +67,18 @@ export class UserService {
     );
   }
 
-  async findById(userId: string) {
-    const user = await this.userModel.findById(userId).select('-password');
-    if (!user) {
-      throw new Error('User not found');
-    }
-    return user;
+// Mã đã sửa (HIỂN THỊ ĐƯỢC SỞ THÍCH) Nam sửa
+async findById(userId: string) {
+  const user = await this.userModel
+    .findById(userId)
+    .select('-password')
+    .populate('interest_id'); // <--- THÊM DÒNG NÀY ĐỂ LẤY THÔNG TIN CHI TIẾT CỦA SỞ THÍCH
+
+  if (!user) {
+    throw new Error('User not found');
   }
+  return user;
+}
 
   async updateProfile(userId: string, updateDto: UpdateUserDto) {
     await this.userModel.updateOne({ _id: userId }, { $set: updateDto });

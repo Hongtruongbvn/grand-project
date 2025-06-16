@@ -33,4 +33,11 @@ export class GroupController {
   ) {
     return await this.groupService.addInterestToGroup(groupId, interestId);
   }
+
+  // ===== THÊM ENDPOINT GET MỚI NÀY VÀO ===== Nam thêm
+  @UseGuards(JwtAuthGuard) // Thêm Guard để bảo vệ
+  @Get()
+  async findAll() {
+    return this.groupService.findAll();
+  }
 }

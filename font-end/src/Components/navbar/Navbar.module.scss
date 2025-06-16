@@ -1,39 +1,197 @@
+/* Kế thừa màu sắc và font từ trang Login */
+$primary-green-dark: #1f5e47;
+$primary-green-light: #2c7d5f;
+$accent-green-bg: #e3f2a5;
+$accent-green-hover: #cbe494;
+$neutral-bg: #f0f2f5;
+$notification-red: #e63946;
+
 .navbar {
-  height: 60px;
-  background-color: #ffffff;
+  height: 65px;
+  background-color: #9ff483; // Giữ lại màu nền bạn đã chọn
   display: flex;
   align-items: center;
-  padding: 0 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   justify-content: space-between;
+  padding: 0 30px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 999;
 }
 
 .logo {
   font-weight: bold;
-  font-size: 1.2rem;
-  color: #333;
+  font-size: 1.5rem;
+  background-color: $accent-green-bg;
+  color: $primary-green-dark;
   cursor: pointer;
+  transition: transform 0.3s ease;
+  // ===== THAY ĐỔI =====
+  padding: 8px 16px; // Thêm khoảng đệm cho chữ không bị dính
+  border-radius: 12px; // Bo tròn các góc cho mềm mại
+
+  &:hover {
+    transform: scale(1.05);
+  }
 }
 
 .searchInput {
   width: 40%;
-  padding: 8px 12px;
-  border: 1px solid #ccc;
-  border-radius: 20px;
+  padding: 10px 20px;
+  border: 1px solid #dfe1e5;
+  border-radius: 24px;
+  background-color: #ffffff; // Đổi thành màu trắng cho nổi bật trên nền xanh
+  font-size: 1rem;
+  transition: all 0.3s ease;
+
+  &:hover {
+    border-color: #c5c7ca;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: $primary-green-light;
+    box-shadow: 0 0 0 3px rgba(44, 125, 95, 0.15);
+  }
+}
+
+.navLinks {
+  display: flex;
+  align-items: center;
+  gap: 20px;
 }
 
 .profile {
   display: flex;
   align-items: center;
+  padding: 6px 12px 6px 6px;
+  border-radius: 20px;
   cursor: pointer;
+  position: relative;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.5); // Hiệu ứng hover trên nền xanh
+  }
 }
 
 .avatar {
-  width: 32px;
-  height: 32px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   margin-right: 10px;
+  object-fit: cover;
+  border: 2px solid white;
+}
+
+.profile span {
+  font-weight: 600;
+  color: $primary-green-dark;
+  font-size: 0.95rem;
+}
+
+// ===== KHU VỰC ICON LỜI MỜI KẾT BẠN (Đã chỉnh lại cho nổi bật) =====
+.requestsContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background-color: #ffffff; // Nền trắng để nổi trên navbar xanh
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease-out;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.navIcon {
+  font-size: 1.9rem;
+  color: $primary-green-light;
+}
+
+.badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: $notification-red;
+  color: white;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: bold;
+  border: 2px solid white;
+  transform: translate(20%, -20%);
+}
+
+.requestsDropdown {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  width: 360px;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  padding: 8px;
+  border: 1px solid #eee;
+  animation: fadeIn 0.2s ease-out;
+
+  & > div {
+    box-shadow: none;
+    padding: 12px;
+  }
+}
+
+.profileContainer {
+  position: relative;
+}
+
+// Style cho menu dropdown
+.profileDropdown {
+  position: absolute;
+  top: calc(100% + 10px); // Vị trí ngay dưới nút profile
+  right: 0;
+  background-color: white;
+  min-width: 180px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  padding: 8px;
+  border: 1px solid #eee;
+  animation: fadeIn 0.2s ease-out; // Dùng lại animation đã có
+}
+
+// Style cho từng mục trong dropdown
+.dropdownItem {
+  padding: 10px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  color: #333;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: #f0f2f5; // Màu nền khi hover
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

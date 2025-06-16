@@ -1,0 +1,59 @@
+$primary-green-dark: #1f5e47;
+$accent-green-bg: #e3f2a5;
+$button-reject-bg: #e4e6eb;
+
+.friendRequests {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 24px;
+
+  h3 {
+    margin: 0 0 16px 0;
+    padding-bottom: 12px;
+    text-align: center;
+    font-size: 1.2rem;
+    color: $primary-green-dark;
+    border-bottom: 1px solid #e9ebee;
+  }
+}
+
+.list {
+  list-style: none; padding: 0; margin: 0;
+  display: flex; flex-direction: column; gap: 10px;
+}
+
+.requestItem {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; padding: 12px; border-radius: 8px;
+  background-color: lighten($accent-green-bg, 5%);
+}
+
+.userInfo {
+  display: flex; align-items: center; gap: 10px;
+  font-weight: 600; color: $primary-green-dark;
+  img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
+}
+
+.actions {
+  display: flex; gap: 8px;
+  button {
+    padding: 7px 14px; border: none; border-radius: 6px;
+    font-weight: bold; cursor: pointer; transition: all 0.2s ease;
+  }
+  .acceptBtn {
+    background-color: $primary-green-dark; color: white;
+    &:hover { background-color: darken($primary-green-dark, 5%); }
+  }
+  .rejectBtn {
+    background-color: $button-reject-bg; color: #050505;
+    &:hover { background-color: darken($button-reject-bg, 5%); }
+  }
+}
+
+.message {
+    text-align: center; padding: 20px; color: #65676b;
+}

@@ -1,108 +1,84 @@
 import { useEffect, useState } from "react";
-import styles from "./FriendList.module.scss";
+import styles from "../../Style/Widget.module.scss";
+import { FaUsers, FaUsersSlash } from "react-icons/fa";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
 
-interface UserInfo {
+interface IFriendInfo {
   _id: string;
   username: string;
   avatar?: string;
-  friend_id?: string[];
-  acceptFriend?: string[];
 }
 
 export default function FriendList() {
-  const [user, setUser] = useState<UserInfo | null>(null);
+  const [friends, setFriends] = useState<IFriendInfo[]>([]);
   const [loading, setLoading] = useState(true);
-  const [requests, setRequests] = useState<UserInfo[]>([]);
-  const [friends, setFriends] = useState<UserInfo[]>([]);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchFriends = async () => {
       const token = localStorage.getItem("token");
-      if (!token) return;
+      if (!token) { setLoading(false); return; }
 
-      const res = await fetch("http://localhost:9090/users/me", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      const currentUser = data.data;
-      setUser(currentUser);
+      try {
+        const res = await fetch("http://localhost:9090/users/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        const friendIds = data.data.friend_id || [];
 
-      if (currentUser.acceptFriend?.length) {
-        const reqList = await Promise.all(
-          currentUser.acceptFriend.map((email: string) =>
-            fetch(`http://localhost:9090/users/find/email?email=${email}`).then((res) =>
-              res.json()
+        if (friendIds.length > 0) {
+          const friendDetails = await Promise.all(
+            // Logic này bây giờ đã đúng vì API GET /users/:id đã tồn tại
+            friendIds.map((id: string) =>
+              fetch(`http://localhost:9090/users/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+              }).then((res) => res.json())
             )
-          )
-        );
-        setRequests(reqList.map((r) => r.data));
+          );
+          // Lọc ra các kết quả không thành công và lấy dữ liệu từ .data
+          const validFriends = friendDetails
+            .filter(response => response && response.data)
+            .map(response => response.data);
+          setFriends(validFriends);
+        }
+      } catch (error) {
+        console.error("Lỗi khi tải danh sách bạn bè:", error);
+      } finally {
+        setLoading(false);
       }
-
-      if (currentUser.friend_id?.length) {
-        const friendList = await Promise.all(
-          currentUser.friend_id.map((email: string) =>
-            fetch(`http://localhost:9090/users/find/email?email=${email}`).then((res) =>
-              res.json()
-            )
-          )
-        );
-        setFriends(friendList.map((r) => r.data));
-      }
-
-      setLoading(false);
     };
-
-    fetchData();
+    fetchFriends();
   }, []);
 
-  const handleAccept = async (id: string) => {
-    const token = localStorage.getItem("token");
-    await fetch(`http://localhost:9090/users/friend/accept/${id}`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    location.reload();
-  };
-
-  const handleReject = async (id: string) => {
-    const token = localStorage.getItem("token");
-    await fetch(`http://localhost:9090/users/friend/reject/${id}`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    location.reload();
-  };
-
-  return (
-    <div className={styles.friendListPage}>
-      <div className={styles.card}>
-        <div className={styles.header}>
-          <h2>Danh sách bạn bè</h2>
-        </div>
-
-        <div className={styles.body}>
-          {requests.length === 0 && friends.length === 0 ? (
-            <p className={styles.empty}>Không có bạn bè hoặc lời mời kết bạn</p>
-          ) : (
-            <ul className={styles.list}>
-              {requests.map((req) => (
-                <li key={req._id} className={styles.listItem}>
-                  <span>{req.username}</span>
-                  <div className={styles.actions}>
-                    <button onClick={() => handleAccept(req._id)}>Đồng ý</button>
-                    <button onClick={() => handleReject(req._id)}>Từ chối</button>
-                  </div>
-                </li>
-              ))}
-              {friends.map((friend) => (
-                <li key={friend._id} className={styles.listItem}>
-                  <span>{friend.username}</span>
-                </li>
-              ))}
-            </ul>
-          )}
+  if (loading) {
+    return (
+      <div className={styles.widget}>
+        <h3><FaUsers /> Bạn bè</h3>
+        <div className={styles.empty}>
+          <AiOutlineLoading3Quarters className={`${styles.icon} ${styles.spinner}`} />
+          <span>Đang tải...</span>
         </div>
       </div>
+    );
+  }
+
+  return (
+    <div className={styles.widget}>
+      <h3><FaUsers /> Bạn bè</h3>
+      {friends.length > 0 ? (
+        <ul className={styles.list}>
+          {friends.map((friend) => (
+            <li key={friend._id} className={styles.item}>
+              <img src={friend.avatar || '/default-avatar.png'} alt="avatar" className={styles.avatar}/>
+              <span className={styles.name}>{friend.username}</span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <div className={styles.empty}>
+          <FaUsersSlash className={styles.icon} />
+          <span>Chưa có bạn bè nào.</span>
+        </div>
+      )}
     </div>
   );
 }

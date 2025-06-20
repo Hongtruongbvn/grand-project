@@ -20,6 +20,10 @@ import { ConfigModule } from '@nestjs/config';
 import { GroupModule } from './group/group.module';
 import { GroupRoleModule } from './group-role/group-role.module';
 import { GroupMemberModule } from './group-member/group-member.module';
+import { NotificationModule } from './notification/notification.module';
+import { MessageModule } from './message/message.module';
+import { ChatroomModule } from './chatroom/chatroom.module';
+import { ChatroomMemberModule } from './chatroom-member/chatroom-member.module';
 
 @Module({
   imports: [
@@ -44,6 +48,8 @@ import { GroupMemberModule } from './group-member/group-member.module';
     GroupModule,
     GroupRoleModule,
     GroupMemberModule,
+    NotificationModule,
+    ChatroomMemberModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,4 +1,16 @@
 import { Module } from '@nestjs/common';
+import { ChatroomService } from './chatroom.service';
+import { ChatroomController } from './chatroom.controller';
+import { MongooseModule } from '@nestjs/mongoose';
+import { Chatroom, ChatroomSchema } from './schema/chatroom.schema';
 
-@Module({})
+@Module({
+  imports: [
+    MongooseModule.forFeature([
+      { name: Chatroom.name, schema: ChatroomSchema },
+    ]),
+  ],
+  controllers: [ChatroomController],
+  providers: [ChatroomService],
+})
 export class ChatroomModule {}

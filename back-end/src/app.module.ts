@@ -4,8 +4,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
-import { RoleModule } from './role/role.module';
-import { PostModule } from './post/post.module';
+// import { RoleModule } from './role/role.module';
+import { PostsModule } from './post/post.module';
 import { CommentModule } from './comment/comment.module';
 import { ReportModule } from './report/report.module';
 import { BlockModule } from './block/block.module';
@@ -21,8 +21,6 @@ import { GroupModule } from './group/group.module';
 import { GroupRoleModule } from './group-role/group-role.module';
 import { GroupMemberModule } from './group-member/group-member.module';
 import { NotificationModule } from './notification/notification.module';
-import { MessageModule } from './message/message.module';
-import { ChatroomModule } from './chatroom/chatroom.module';
 import { ChatroomMemberModule } from './chatroom-member/chatroom-member.module';
 
 @Module({
@@ -34,8 +32,8 @@ import { ChatroomMemberModule } from './chatroom-member/chatroom-member.module';
 
     UserModule,
     AuthModule,
-    RoleModule,
-    PostModule,
+    // RoleModule,
+    PostsModule,
     CommentModule,
     TypeModule,
     InterestModule,

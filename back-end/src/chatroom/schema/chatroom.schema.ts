@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
 
 @Schema({ timestamps: true })
-export class Chatroom extends Document {
+export class Chatroom {
   @Prop({ required: true })
   name: string;
 
@@ -10,7 +10,7 @@ export class Chatroom extends Document {
   owner: Types.ObjectId;
 
   @Prop({ required: true, enum: ['public', 'private', 'group'] }) // enum giả định
-  type: string;
+  type: 'public' | 'private' | 'group';
 }
 
 export const ChatroomSchema = SchemaFactory.createForClass(Chatroom);

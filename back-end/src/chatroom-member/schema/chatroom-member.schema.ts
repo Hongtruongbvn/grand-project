@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
 @Schema({ timestamps: true })
-export class ChatroomMember extends Document {
+export class ChatroomMember {
   @Prop({ type: Types.ObjectId, ref: 'Chatroom', required: true })
   chatroom_id: Types.ObjectId;
 

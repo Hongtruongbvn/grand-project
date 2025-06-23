@@ -150,6 +150,14 @@ export class UserController {
     return { message: 'Lấy thông tin thành công', data: user };
   }
 
+      // ===== THÊM ENDPOINT NÀY VÀO ===== Nam thêm
+    @UseGuards(JwtAuthGuard)
+    @Get('search')
+    async searchUsers(@Query('q') query: string) {
+        return this.userService.searchByName(query);
+    }
+
+
   @UseGuards(JwtAuthGuard)
   @Post('email/request-change')
   async requestEmailChange(@Request() req, @Body('newEmail') newEmail: string) {

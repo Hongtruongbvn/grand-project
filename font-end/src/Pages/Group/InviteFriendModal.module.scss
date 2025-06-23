@@ -1,0 +1,69 @@
+.modalOverlay {
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1001;
+}
+
+.modalContent {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 400px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+
+    h3 {
+        margin: 0 0 16px 0;
+        text-align: center;
+        color: #1f5e47;
+    }
+}
+
+.friendList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    overflow-y: auto;
+    
+    li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px;
+        border-radius: 6px;
+        &:hover { background-color: #f0f2f5; }
+    }
+}
+
+.userInfo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    img { width: 36px; height: 36px; border-radius: 50%; }
+    span { font-weight: 500; }
+}
+
+.inviteBtn, .invitedBtn {
+    padding: 6px 16px;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.inviteBtn {
+    background-color: #e3f2a5;
+    color: #1f5e47;
+    &:hover { background-color: #d2e293; }
+}
+
+.invitedBtn {
+    background-color: #e4e6eb;
+    color: #65676b;
+    cursor: not-allowed;
+}

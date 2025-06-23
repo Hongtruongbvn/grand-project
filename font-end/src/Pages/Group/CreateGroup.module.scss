@@ -1,0 +1,53 @@
+@use "sass:color"; // <-- Thêm dòng này
+$primary-green-dark: #1f5e47;
+
+// ... các style .modalOverlay, .modalContent, .formGroup giữ nguyên ...
+.modalOverlay {
+  position: fixed; top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background-color: white; padding: 24px 32px; border-radius: 12px;
+  width: 90%; max-width: 500px; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+  h2 { margin: 0 0 24px 0; text-align: center; color: $primary-green-dark; }
+}
+
+.formGroup {
+  margin-bottom: 16px;
+  label { display: block; margin-bottom: 8px; font-weight: 600; color: #333; }
+  input, textarea {
+    width: 100%; padding: 10px 14px; border: 1px solid #ccc;
+    border-radius: 8px; font-size: 1rem;
+    &:focus {
+      outline: none; border-color: $primary-green-dark;
+      box-shadow: 0 0 0 3px rgba(31, 94, 71, 0.15);
+    }
+  }
+  textarea { resize: vertical; }
+}
+
+.actions {
+  display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;
+  button {
+    padding: 10px 20px; border: none; border-radius: 8px;
+    font-weight: bold; cursor: pointer; transition: all 0.2s ease;
+  }
+  .cancelBtn {
+    background-color: #e4e6eb; color: #050505;
+    &:hover { background-color: #d8dadf; }
+  }
+  .submitBtn {
+    background-color: $primary-green-dark; color: white;
+    &:hover { 
+        // Sửa lại cú pháp darken
+        background-color: color.adjust($primary-green-dark, $lightness: -5%); 
+    }
+    &:disabled { background-color: #ccc; cursor: not-allowed; }
+  }
+}
+
+.error { color: #e63946; text-align: center; margin-top: 10px; font-weight: 500; }

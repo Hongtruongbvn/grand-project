@@ -1,3 +1,5 @@
+@use "sass:color";
+
 /* Kế thừa màu sắc và font từ trang Login */
 $primary-green-dark: #1f5e47;
 $primary-green-light: #2c7d5f;
@@ -8,7 +10,7 @@ $notification-red: #e63946;
 
 .navbar {
   height: 65px;
-  background-color: #9ff483; // Giữ lại màu nền bạn đã chọn
+  background-color: #9ff483;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -26,21 +28,35 @@ $notification-red: #e63946;
   color: $primary-green-dark;
   cursor: pointer;
   transition: transform 0.3s ease;
-  // ===== THAY ĐỔI =====
-  padding: 8px 16px; // Thêm khoảng đệm cho chữ không bị dính
-  border-radius: 12px; // Bo tròn các góc cho mềm mại
+  padding: 8px 16px;
+  border-radius: 12px;
 
   &:hover {
     transform: scale(1.05);
   }
 }
 
-.searchInput {
+// ===== KHU VỰC TÌM KIẾM (MỚI & CẬP NHẬT) =====
+.searchContainer {
+  position: relative;
   width: 40%;
-  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 15px;
+  color: #65676b;
+  z-index: 1; // Đảm bảo icon nổi lên trên input
+}
+
+.searchInput {
+  width: 100%; // Chiếm hết không gian của container
+  padding: 10px 20px 10px 40px; // Tăng padding trái để chừa chỗ cho icon
   border: 1px solid #dfe1e5;
   border-radius: 24px;
-  background-color: #ffffff; // Đổi thành màu trắng cho nổi bật trên nền xanh
+  background-color: #ffffff;
   font-size: 1rem;
   transition: all 0.3s ease;
 
@@ -55,10 +71,60 @@ $notification-red: #e63946;
   }
 }
 
+.searchResultsDropdown {
+  position: absolute;
+  top: calc(100% + 8px); // Khoảng cách với ô search
+  left: 0;
+  width: 100%;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  max-height: 400px;
+  overflow-y: auto;
+  z-index: 1001;
+  border: 1px solid #eee;
+
+  h4 {
+    padding: 8px 15px;
+    margin: 4px 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #65676b;
+  }
+}
+
+.resultItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 15px;
+  cursor: pointer;
+  &:hover {
+    background-color: $neutral-bg;
+  }
+
+  img {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  span {
+      font-weight: 500;
+  }
+}
+
+
+// ===== CÁC KHU VỰC CÒN LẠI =====
 .navLinks {
   display: flex;
   align-items: center;
   gap: 20px;
+}
+
+.profileContainer {
+  position: relative;
 }
 
 .profile {
@@ -67,11 +133,10 @@ $notification-red: #e63946;
   padding: 6px 12px 6px 6px;
   border-radius: 20px;
   cursor: pointer;
-  position: relative;
   transition: background-color 0.3s ease;
 
   &:hover {
-    background-color: rgba(255, 255, 255, 0.5); // Hiệu ứng hover trên nền xanh
+    background-color: rgba(255, 255, 255, 0.5);
   }
 }
 
@@ -90,7 +155,6 @@ $notification-red: #e63946;
   font-size: 0.95rem;
 }
 
-// ===== KHU VỰC ICON LỜI MỜI KẾT BẠN (Đã chỉnh lại cho nổi bật) =====
 .requestsContainer {
   position: relative;
   display: flex;
@@ -98,7 +162,7 @@ $notification-red: #e63946;
   justify-content: center;
   width: 44px;
   height: 44px;
-  background-color: #ffffff; // Nền trắng để nổi trên navbar xanh
+  background-color: #ffffff;
   border-radius: 50%;
   cursor: pointer;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
@@ -133,7 +197,7 @@ $notification-red: #e63946;
   transform: translate(20%, -20%);
 }
 
-.requestsDropdown {
+.requestsDropdown, .profileDropdown {
   position: absolute;
   top: calc(100% + 12px);
   right: 0;
@@ -145,33 +209,18 @@ $notification-red: #e63946;
   padding: 8px;
   border: 1px solid #eee;
   animation: fadeIn 0.2s ease-out;
+}
 
-  & > div {
+.profileDropdown {
+    min-width: 200px;
+    width: auto;
+}
+
+.requestsDropdown > div {
     box-shadow: none;
     padding: 12px;
-  }
 }
 
-.profileContainer {
-  position: relative;
-}
-
-// Style cho menu dropdown
-.profileDropdown {
-  position: absolute;
-  top: calc(100% + 10px); // Vị trí ngay dưới nút profile
-  right: 0;
-  background-color: white;
-  min-width: 180px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  z-index: 1000;
-  padding: 8px;
-  border: 1px solid #eee;
-  animation: fadeIn 0.2s ease-out; // Dùng lại animation đã có
-}
-
-// Style cho từng mục trong dropdown
 .dropdownItem {
   padding: 10px 15px;
   border-radius: 6px;
@@ -181,17 +230,11 @@ $notification-red: #e63946;
   transition: background-color 0.2s ease;
 
   &:hover {
-    background-color: #f0f2f5; // Màu nền khi hover
+    background-color: #f0f2f5;
   }
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }

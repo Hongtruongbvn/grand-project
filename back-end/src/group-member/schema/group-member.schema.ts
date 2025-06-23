@@ -15,7 +15,6 @@ export class GroupMember {
   @Prop({
     type: MongooseSchema.Types.ObjectId,
     ref: 'GroupRole',
-    required: true,
   })
   group_role_id: Types.ObjectId;
 

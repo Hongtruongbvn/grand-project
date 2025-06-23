@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from './schema/user.schema';
 import { Model, Types } from 'mongoose';
@@ -67,18 +71,21 @@ export class UserService {
     );
   }
 
-// Mã đã sửa (HIỂN THỊ ĐƯỢC SỞ THÍCH) Nam sửa
-async findById(userId: string) {
-  const user = await this.userModel
-    .findById(userId)
-    .select('-password')
-    .populate('interest_id'); // <--- THÊM DÒNG NÀY ĐỂ LẤY THÔNG TIN CHI TIẾT CỦA SỞ THÍCH
+  // Mã đã sửa (HIỂN THỊ ĐƯỢC SỞ THÍCH) Nam sửa
+  async findById(userId: string) {
+    const user = await this.userModel
+      .findById(userId)
+      .select('-password')
+      .populate('interest_id'); // <--- THÊM DÒNG NÀY ĐỂ LẤY THÔNG TIN CHI TIẾT CỦA SỞ THÍCH
 
-  if (!user) {
-    throw new Error('User not found');
+    if (!user) {
+      throw new Error('User not found');
+    }
+    return user;
   }
-  return user;
-}
+  async findOne(userId: string): Promise<User | null> {
+    return this.userModel.findById(userId).exec();
+  }
 
   async updateProfile(userId: string, updateDto: UpdateUserDto) {
     await this.userModel.updateOne({ _id: userId }, { $set: updateDto });
@@ -300,5 +307,21 @@ async findById(userId: string) {
     await user.save();
 
     return { message: 'Email đã được cập nhật thành công' };
+  }
+  async getAllFriends(userId: string): Promise<User[]> {
+    const sender = await this.userModel.findById(userId).exec();
+    if (!sender) throw new NotFoundException('Sender not found');
+
+    // Nếu danh sách bạn bè rỗng
+    if (!sender.friend_id || sender.friend_id.length === 0) {
+      return [];
+    }
+
+    // Trả về toàn bộ thông tin bạn bè
+    return this.userModel
+      .find({
+        _id: { $in: sender.friend_id },
+      })
+      .exec();
   }
 }

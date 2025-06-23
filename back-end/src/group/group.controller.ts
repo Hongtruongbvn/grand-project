@@ -9,11 +9,12 @@ import {
   UseGuards,
   Req,
   Request,
+  Query,
 } from '@nestjs/common';
 import { GroupService } from './group.service';
 import { CreateGroupDto } from './dto/create-group.dto';
-import { UpdateGroupDto } from './dto/update-group.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { Group } from './schema/group.schema';
 
 @Controller('group')
 export class GroupController {
@@ -39,5 +40,25 @@ export class GroupController {
   @Get()
   async findAll() {
     return this.groupService.findAll();
+  }
+  @UseGuards(JwtAuthGuard)
+  @Post('add-member/:receiverId/:groupId')
+  async addMemberToGroup(
+    @Req() req: any,
+    @Param('receiverId') receiverId: string,
+    @Param('groupId') groupId: string,
+  ) {
+    const senderId = req.user.userId;
+    return await this.groupService.addMemberToGroup(
+      senderId,
+      receiverId,
+      groupId,
+    );
+  }
+  @UseGuards(JwtAuthGuard)
+  @Post('accept/:groupId')
+  async acceptJoinRequest(@Req() req: any, @Param('groupId') groupId: string) {
+    const userId = req.user.userId;
+    return await this.groupService.aproveJoinRequest(userId, groupId);
   }
 }

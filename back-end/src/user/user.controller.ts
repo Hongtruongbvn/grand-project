@@ -135,7 +135,6 @@ export class UserController {
     return this.userService.removeFriend(req.user.userId, friendId);
   }
 
-
   // ===== THÊM ENDPOINT MỚI NÀY VÀO ĐỂ SỬA LỖI LOGIC ===== Nam thêm
   @UseGuards(JwtAuthGuard) // Bảo vệ endpoint này
   @Get(':id')
@@ -161,5 +160,10 @@ export class UserController {
   @Post('email/confirm-change')
   async confirmEmailChange(@Request() req, @Body('otp') otp: string) {
     return this.userService.confirmEmailChange(req.user.userId, otp);
+  }
+  @UseGuards(JwtAuthGuard)
+  @Get('Find/Friend')
+  async getAllFriends(@Request() req) {
+    return this.userService.getAllFriends(req.user.userId);
   }
 }

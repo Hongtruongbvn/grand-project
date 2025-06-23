@@ -91,11 +91,11 @@ export class GroupController {
     return await this.groupService.createRquestJoin(userId, groupId);
   }
   @UseGuards(JwtAuthGuard)
-  @Post('atp/:groupId')
+  @Post('atp/:groupId/:senderId')
   async atpjoinRequest(
     @Req() req: any,
     @Param('groupId') groupId: string,
-    senderId: string,
+    @Param('senderId') senderId: string,
   ) {
     const userId = req.user.userId;
     return await this.groupService.actJoinRequest(userId, groupId, senderId);

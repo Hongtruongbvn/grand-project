@@ -159,6 +159,18 @@ export class GroupService {
       group.owner.toString(),
       user_id,
     );
+    const role = await this.groupRoleService.findName('member');
+    if (!role) {
+      throw new NotFoundException('Role not found');
+    }
+    const receiver = await this.userService.findById(user_id);
+    const id = role._id as Types.ObjectId;
+    const groupMember = await this.groupMemService.RequestJoin(
+      receiver.username,
+      group_id,
+      user_id,
+      id.toString(),
+    );
   }
   async actJoinRequest(user_id: string, group_id: string, sender_id: string) {
     const group = await this.groupModel.findById(group_id);
@@ -169,12 +181,6 @@ export class GroupService {
       const member = await this.groupMemService.isMember(sender_id, group_id);
       if (!member) {
         throw new NotFoundException('Member not found in this group');
-      }
-      const isJoined = await this.isJoined(sender_id, group_id);
-      if (isJoined) {
-        throw new NotFoundException(
-          'this member are already a member of this group',
-        );
       }
       member.isActive = true;
       member.joinedAt = new Date();

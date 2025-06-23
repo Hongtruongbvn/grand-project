@@ -10,7 +10,6 @@ export class CreateNotificationDto {
   @IsMongoId()
   user_id: string;
 
-  @IsEnum(['info', 'warning', 'alert', 'message'])
   title: string;
 
   @IsOptional()

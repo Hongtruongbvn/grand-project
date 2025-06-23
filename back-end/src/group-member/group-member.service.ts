@@ -84,4 +84,10 @@ export class GroupMemberService {
     }
     return member;
   }
+  async Delete(id: string): Promise<void> {
+    const result = await this.memberModel.deleteOne({ _id: id });
+    if (result.deletedCount === 0) {
+      throw new NotFoundException('Group member not found');
+    }
+  }
 }

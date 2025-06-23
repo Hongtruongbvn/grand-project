@@ -80,6 +80,10 @@ export class GroupService {
       id.toString(),
     );
   }
+  async isJoined(userId: string, groupId: string): Promise<boolean> {
+    const member = await this.groupMemService.isMember(userId, groupId);
+    return !!member;
+  }
   async aproveJoinRequest(userId: string, groupId: string) {
     const member = await this.groupMemService.findMemberById(userId, groupId);
     if (!member) {
@@ -101,5 +105,35 @@ export class GroupService {
     // Lưu lại group đã cập nhật
     await group.save();
     return member.save();
+  }
+  async rejectJoinRequest(
+    userId: string,
+    groupId: string,
+  ): Promise<{ message: string }> {
+    const member = await this.groupMemService.findMemberById(userId, groupId);
+    if (!member) {
+      throw new NotFoundException('Join request not found');
+    }
+    const isJoined = await this.isJoined(userId, groupId);
+    if (isJoined) {
+      throw new NotFoundException('You are already a member of this group');
+    }
+    await this.groupMemService.Delete(member._id.toString());
+
+    return { message: 'Join request rejected and deleted successfully' };
+  }
+
+  async findByName(name: string): Promise<Group> {
+    const group = await this.groupModel.findOne({ name }).exec();
+    if (!group) {
+      throw new NotFoundException('Group not found');
+    }
+    return group;
+  }
+  async createRquestJoin(user_id: string, group_id: string) {
+    const group = await this.groupModel.findById(group_id);
+    if (!group) {
+      throw new NotFoundException('Group not found');
+    }
   }
 }

@@ -84,4 +84,34 @@ export class GroupController {
     }
     return group;
   }
+  @UseGuards(JwtAuthGuard)
+  @Post('request-join/:groupId')
+  async requestJoinGroup(@Req() req: any, @Param('groupId') groupId: string) {
+    const userId = req.user.userId;
+    return await this.groupService.createRquestJoin(userId, groupId);
+  }
+  @UseGuards(JwtAuthGuard)
+  @Post('atp/:groupId')
+  async atpjoinRequest(
+    @Req() req: any,
+    @Param('groupId') groupId: string,
+    senderId: string,
+  ) {
+    const userId = req.user.userId;
+    return await this.groupService.actJoinRequest(userId, groupId, senderId);
+  }
+  @UseGuards(JwtAuthGuard)
+  @Post('rejt/:groupId')
+  async rejJoinRequest(
+    @Req() req: any,
+    @Param('groupId') groupId: string,
+    senderId: string,
+  ) {
+    const userId = req.user.userId;
+    return await this.groupService.rejectJoinRequestNyOwner(
+      userId,
+      groupId,
+      senderId,
+    );
+  }
 }

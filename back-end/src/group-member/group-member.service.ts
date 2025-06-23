@@ -90,4 +90,23 @@ export class GroupMemberService {
       throw new NotFoundException('Group member not found');
     }
   }
+  async DeleteByUserIdAndGroupId(
+    userId: string,
+    groupId: string,
+  ): Promise<void> {
+    const result = await this.memberModel.deleteOne({
+      user_id: new Types.ObjectId(userId),
+      group_id: new Types.ObjectId(groupId),
+    });
+    if (result.deletedCount === 0) {
+      throw new NotFoundException('Group member not found');
+    }
+  }
+  async findById(id: string): Promise<GroupMember | null> {
+    const member = await this.memberModel.findOne({ user_id: id }).exec();
+    if (!member) {
+      throw new NotFoundException('Group member not found');
+    }
+    return member;
+  }
 }

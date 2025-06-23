@@ -65,8 +65,8 @@ export class GroupService {
     if (!group) {
       throw new NotFoundException('Group not found');
     }
-    const notification = await this.notificationService.createInviteNT(
-      'message',
+    const notification = await this.notificationService.createNoTi(
+      'add group request',
       receiver_id,
       sender_id,
     );
@@ -149,6 +149,70 @@ export class GroupService {
     const group = await this.groupModel.findById(group_id);
     if (!group) {
       throw new NotFoundException('Group not found');
+    }
+    const user = await this.userService.findById(user_id);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    const notification = await this.notificationService.createNoTi(
+      'new join request',
+      group.owner.toString(),
+      user_id,
+    );
+  }
+  async actJoinRequest(user_id: string, group_id: string, sender_id: string) {
+    const group = await this.groupModel.findById(group_id);
+    if (!group) {
+      throw new NotFoundException('Group not found');
+    }
+    if (group.owner.toString() == user_id) {
+      const member = await this.groupMemService.isMember(sender_id, group_id);
+      if (!member) {
+        throw new NotFoundException('Member not found in this group');
+      }
+      const isJoined = await this.isJoined(sender_id, group_id);
+      if (isJoined) {
+        throw new NotFoundException(
+          'this member are already a member of this group',
+        );
+      }
+      member.isActive = true;
+      member.joinedAt = new Date();
+      const group = await this.groupModel.findById(group_id);
+      if (!group) {
+        throw new NotFoundException('Group not found');
+      }
+      group.members = Array.from(
+        new Set([
+          ...group.members.map((id) => id.toString()),
+          member.user_id.toString(),
+        ]),
+      ).map((id) => new Types.ObjectId(id));
+
+      await group.save();
+      return member.save();
+    } else {
+      throw new NotFoundException('You are not the owner of this group');
+    }
+  }
+  async rejectJoinRequestNyOwner(
+    user_id: string,
+    group_id: string,
+    sender_id: string,
+  ) {
+    const group = await this.groupModel.findById(group_id);
+    if (!group) {
+      throw new NotFoundException('Group not found');
+    }
+    if (group.owner.toString() == user_id) {
+      const member = await this.groupMemService.isMember(sender_id, group_id);
+      if (!member) {
+        throw new NotFoundException('Member not found in this group');
+      }
+      await this.groupMemService.DeleteByUserIdAndGroupId(sender_id, group_id);
+      return { message: 'Join request rejected and deleted successfully' };
+    } else {
+      throw new NotFoundException('You are not the owner of this group');
     }
   }
 }

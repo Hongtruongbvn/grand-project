@@ -10,7 +10,7 @@ export class NotificationService {
     @InjectModel(Notification.name)
     private readonly notificationModel: Model<Notification>,
   ) {}
-  async createInviteNT(title: string, user_id: string, sender_id: string) {
+  async createNoTi(title: string, user_id: string, sender_id: string) {
     const notification = new CreateNotificationDto();
     notification.title = title;
     notification.user_id = user_id;
@@ -22,5 +22,9 @@ export class NotificationService {
       sender_id: new Types.ObjectId(notification.sender_id),
       isRead: false,
     });
+  }
+
+  async detectNotification(id: string): Promise<Notification | null> {
+    return this.notificationModel.findById(id).exec();
   }
 }

@@ -62,7 +62,6 @@ export class User extends Document {
 
   @Prop()
   pendingNewEmail?: string;
-
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

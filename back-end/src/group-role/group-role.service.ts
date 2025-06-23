@@ -3,12 +3,16 @@ import { CreateGroupRoleDto } from './dto/create-group-role.dto';
 import { UpdateGroupRoleDto } from './dto/update-group-role.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { GroupRole } from './schema/group-role.schema';
-import { Model, Types } from 'mongoose';
+import { Model, Document } from 'mongoose';
+import { UserService } from 'src/user/user.service';
+import { GroupMemberService } from 'src/group-member/group-member.service';
 
 @Injectable()
 export class GroupRoleService {
   constructor(
     @InjectModel(GroupRole.name) private groupRoleModel: Model<GroupRole>,
+    private readonly userService: UserService,
+    private readonly groupMemService: GroupMemberService,
   ) {}
 
   async create(createGroupRoleDto: CreateGroupRoleDto): Promise<GroupRole> {
@@ -25,5 +29,23 @@ export class GroupRoleService {
   }
   async findAll(): Promise<GroupRole[]> {
     return this.groupRoleModel.find().exec();
+  }
+  async findName(name: string): Promise<(GroupRole & Document) | null> {
+    return this.groupRoleModel.findOne({ name }).exec();
+  }
+  async AddGroupRoleToMember(
+    groupId: string,
+    userId: string,
+    groupRoleId: string,
+  ): Promise<void> {
+    const isMember = await this.groupMemService.isMember(userId, groupId);
+    if (!isMember) {
+      throw new NotFoundException(`User  is not a member of group `);
+    }
+    const addRole = await this.groupMemService.updateMemberRole(
+      userId,
+      groupId,
+      groupRoleId,
+    );
   }
 }

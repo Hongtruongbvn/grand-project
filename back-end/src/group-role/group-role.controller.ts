@@ -28,4 +28,8 @@ export class GroupRoleController {
   async findAll() {
     return await this.groupRoleService.findAll();
   }
+  @Get(':name')
+  async findName(@Param('name') name: string) {
+    return await this.groupRoleService.findName(name);
+  }
 }

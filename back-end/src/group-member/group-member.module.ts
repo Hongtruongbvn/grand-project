@@ -6,11 +6,13 @@ import { GroupMember, GroupMemberSchema } from './schema/group-member.schema';
 
 @Module({
   imports: [
+    
     MongooseModule.forFeature([
       { name: GroupMember.name, schema: GroupMemberSchema },
     ]),
   ],
   controllers: [GroupMemberController],
   providers: [GroupMemberService],
+  exports: [GroupMemberService],
 })
 export class GroupMemberModule {}

@@ -61,4 +61,10 @@ export class GroupController {
     const userId = req.user.userId;
     return await this.groupService.aproveJoinRequest(userId, groupId);
   }
+  @UseGuards(JwtAuthGuard)
+  @Post('reject/:groupId')
+  async rejectJoinRequest(@Req() req: any, @Param('groupId') groupId: string) {
+    const userId = req.user.userId;
+    return await this.groupService.rejectJoinRequest(userId, groupId);
+  }
 }

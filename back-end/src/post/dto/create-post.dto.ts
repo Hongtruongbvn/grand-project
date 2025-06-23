@@ -1,5 +1,4 @@
-// posts/dto/create-post.dto.ts
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, IsIn } from 'class-validator';
 
 export class CreatePostDto {
   @IsNotEmpty()
@@ -7,4 +6,11 @@ export class CreatePostDto {
 
   @IsNotEmpty()
   content: string;
+
+  @IsOptional()
+  @IsString()
+  shortVideo?: string;
+
+  @IsIn(['text', 'video', 'mixed'])
+  type: 'text' | 'video' | 'mixed';
 }

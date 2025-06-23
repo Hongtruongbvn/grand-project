@@ -1,7 +1,11 @@
+@use "sass:color"; // <-- Thêm dòng này để sử dụng module màu mới
+
+// ===== BIẾN MÀU =====
 $primary-green-dark: #1f5e47;
 $accent-green-bg: #e3f2a5;
 $button-reject-bg: #e4e6eb;
 
+// ===== STYLE CHÍNH =====
 .friendRequests {
   background-color: #ffffff;
   border-radius: 12px;
@@ -29,7 +33,8 @@ $button-reject-bg: #e4e6eb;
 .requestItem {
   display: flex; align-items: center; justify-content: space-between;
   gap: 10px; padding: 12px; border-radius: 8px;
-  background-color: lighten($accent-green-bg, 5%);
+  // Sửa cú pháp lighten
+  background-color: color.adjust($accent-green-bg, $lightness: 5%);
 }
 
 .userInfo {
@@ -46,11 +51,17 @@ $button-reject-bg: #e4e6eb;
   }
   .acceptBtn {
     background-color: $primary-green-dark; color: white;
-    &:hover { background-color: darken($primary-green-dark, 5%); }
+    &:hover { 
+      // Sửa cú pháp darken
+      background-color: color.adjust($primary-green-dark, $lightness: -5%); 
+    }
   }
   .rejectBtn {
     background-color: $button-reject-bg; color: #050505;
-    &:hover { background-color: darken($button-reject-bg, 5%); }
+    &:hover { 
+      // Sửa cú pháp darken
+      background-color: color.adjust($button-reject-bg, $lightness: -5%); 
+    }
   }
 }
 

@@ -22,9 +22,11 @@ export class GroupService {
     createGroupDto: CreateGroupDto,
     ownerId: string,
   ): Promise<Group> {
+    const ownerObjectId = new Types.ObjectId(ownerId); //nam thêm
     const created = new this.groupModel({
       ...createGroupDto,
-      owner: new Types.ObjectId(ownerId),
+      owner: ownerObjectId, // Nam sửa
+      members: [ownerObjectId], // Nam thêm
     });
     return created.save();
   }
@@ -80,6 +82,19 @@ export class GroupService {
       id.toString(),
     );
   }
+
+  // ===== THÊM HÀM NÀY VÀO ===== Nam thêm
+  async findById(id: string): Promise<Group> {
+    const group = await this.groupModel
+      .findById(id)
+      .populate('owner members', 'username avatar')
+      .exec();
+    if (!group) {
+      throw new NotFoundException('Group not found');
+    }
+    return group;
+  }
+
   async isJoined(userId: string, groupId: string): Promise<boolean> {
     const member = await this.groupMemService.isMember(userId, groupId);
     return !!member;

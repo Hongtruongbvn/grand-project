@@ -1,0 +1,59 @@
+@use "sass:color";
+$primary-green-dark: #1f5e47;
+
+.createPost {
+  background-color: #ffffff; border-radius: 12px;
+  padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  margin-bottom: 24px;
+}
+
+.inputArea {
+  display: flex; gap: 12px;
+  padding-bottom: 12px;
+  .avatar { width: 40px; height: 40px; border-radius: 50%; }
+  textarea {
+    width: 100%; border: none; resize: none; font-size: 1.1rem;
+    padding-top: 8px;
+    &::placeholder { color: #65676b; }
+    &:focus { outline: none; }
+  }
+}
+
+.mediaPreview {
+    margin-top: 10px;
+    img { max-width: 100%; border-radius: 8px; }
+}
+
+.actions {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-top: 12px; border-top: 1px solid #e9ebee;
+}
+
+.attachment {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    .actionIcon { color: #45bd62; }
+    .mediaInput {
+        border: 1px solid #ccc;
+        border-radius: 20px;
+        padding: 6px 12px;
+        font-size: 0.9rem;
+    }
+}
+
+.rightActions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.privacySelector { /* Style cho dropdown privacy */ }
+
+button {
+  background-color: $primary-green-dark; color: white; border: none;
+  padding: 8px 24px; border-radius: 8px; font-weight: bold;
+  cursor: pointer; transition: background-color 0.2s ease;
+  &:hover { background-color: color.adjust($primary-green-dark, $lightness: 5%); }
+  &:disabled { background-color: #ccc; cursor: not-allowed; }
+}

@@ -18,51 +18,148 @@ $border-color: #e9ebee;
   flex-direction: column;
 
   h3 {
-    display: flex; align-items: center; gap: 10px;
-    margin: 0 0 16px 0; padding-bottom: 12px;
-    text-align: center; justify-content: center;
-    font-size: 1.2rem; color: $primary-green-dark;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 16px 0;
+    padding-bottom: 12px;
+    text-align: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: $primary-green-dark;
     border-bottom: 1px solid $border-color;
   }
 }
 
 .list {
-  list-style: none; padding: 0 4px; margin: 0 -4px;
-  overflow-y: auto; flex-grow: 1;
-  &::-webkit-scrollbar { width: 6px; }
-  &::-webkit-scrollbar-thumb { background: #d1d1d1; border-radius: 10px; }
-  &::-webkit-scrollbar-thumb:hover { background: #b1b1b1; }
+  list-style: none;
+  padding: 0 4px;
+  margin: 0 -4px;
+  overflow-y: auto;
+  flex-grow: 1;
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #d1d1d1;
+    border-radius: 10px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: #b1b1b1;
+  }
 }
 
 .item {
-  display: flex; align-items: center; gap: 12px;
-  padding: 12px 15px; border-radius: 8px; margin-bottom: 8px;
-  cursor: pointer; background-color: $accent-green-bg;
-  color: $primary-green-dark; transition: all 0.25s ease-out;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 15px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  background-color: $accent-green-bg;
+  color: $primary-green-dark;
+  transition: all 0.25s ease-out;
 
   &:hover {
     background-color: $accent-green-hover;
     transform: scale(1.03);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   }
 
   .avatar {
-    width: 40px; height: 40px; border-radius: 50%;
-    object-fit: cover; border: 2px solid $primary-green-dark;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid $primary-green-dark;
   }
-  
-  .name { font-weight: 600; }
-  .meta { font-size: 0.8rem; opacity: 0.8; }
+
+  .name {
+    font-weight: 600;
+  }
+  .meta {
+    font-size: 0.8rem;
+    opacity: 0.8;
+  }
 }
 
 .empty {
-  display: flex; flex-direction: column; align-items: center;
-  justify-content: center; text-align: center;
-  color: $text-secondary; height: 100%; flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: $text-secondary;
+  height: 100%;
+  flex-grow: 1;
 
-  .icon { font-size: 3rem; margin-bottom: 12px; opacity: 0.7; }
-  span { font-size: 0.9rem; font-weight: 500; line-height: 1.4; }
+  .icon {
+    font-size: 3rem;
+    margin-bottom: 12px;
+    opacity: 0.7;
+  }
+  span {
+    font-size: 0.9rem;
+    font-weight: 500;
+    line-height: 1.4;
+  }
 }
 
-@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-.spinner { animation: spin 1s linear infinite; }
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+// Thêm vào cuối file Widget.module.scss
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin: 0 0 16px 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid $border-color;
+
+  // Ghi đè lại style của h3 để nó không chiếm toàn bộ chiều rộng
+  h3 {
+    margin: 0;
+    padding: 0;
+    border: none;
+    text-align: left;
+    justify-content: flex-start;
+  }
+}
+
+.createButton {
+  display: flex;
+  align-items: center;
+  gap: 8px; // Khoảng cách giữa icon và chữ
+  background-color: $accent-green-bg; // Dùng màu accent từ biến
+  color: $primary-green-dark; // Dùng màu chữ từ biến
+  border: none;
+  padding: 8px 12px; // Thêm padding cho nút
+  border-radius: 8px; // Bo góc vừa phải
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: $accent-green-hover;
+    transform: scale(1.05);
+  }
+}
+
+// Trong class .item, sửa lại một chút để hiển thị tên và meta đúng hơn
+.item {
+  // ... các style cũ
+  justify-content: space-between; // Để đẩy meta sang phải
+}

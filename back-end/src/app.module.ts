@@ -18,6 +18,7 @@ import { InterestModule } from './interest/interest.module';
 
 import { ConfigModule } from '@nestjs/config';
 import { GroupModule } from './group/group.module';
+import { SearchModule } from './search/search.module'; // Nam thêm
 import { GroupRoleModule } from './group-role/group-role.module';
 import { GroupMemberModule } from './group-member/group-member.module';
 import { NotificationModule } from './notification/notification.module';
@@ -48,6 +49,7 @@ import { ChatroomMemberModule } from './chatroom-member/chatroom-member.module';
     GroupMemberModule,
     NotificationModule,
     ChatroomMemberModule,
+    SearchModule, // Nam thêm
   ],
   controllers: [AppController],
   providers: [AppService],

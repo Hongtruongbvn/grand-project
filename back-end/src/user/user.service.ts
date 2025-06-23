@@ -87,6 +87,12 @@ export class UserService {
     return this.userModel.findById(userId).exec();
   }
 
+  async searchByName(name: string): Promise<User[]> { // Tìm kiếm người dùng theo tên===Nam thêm
+    if (!name) return [];
+    // Tìm user có username chứa chuỗi query, không phân biệt hoa thường
+    return this.userModel.find({ username: { $regex: name, $options: 'i' } }).limit(10).exec();
+}
+
   async updateProfile(userId: string, updateDto: UpdateUserDto) {
     await this.userModel.updateOne({ _id: userId }, { $set: updateDto });
     return this.findById(userId);

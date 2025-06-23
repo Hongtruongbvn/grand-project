@@ -9,6 +9,7 @@ import ResetPassword from './Pages/ForgotPassword/ResetPassword';
 import VerifyOtp from './Pages/OTP/VerifyOtp';
 import InterestSelection from './Pages/Interests/SelectInterests';
 import EditProfile from './Pages/Profile/EditProfile';
+import GroupPage from './Pages/Group/GroupPage';
 
 const App = () => {
   return (
@@ -24,6 +25,7 @@ const App = () => {
       <Route path="/home" element={<Home />} />
       <Route path="/profile" element={<ProfileUser />} />
       <Route path="/edit-profile" element={<EditProfile />} />
+      <Route path="/group/:groupId" element={<GroupPage />} />
     </Routes>
   );
 };

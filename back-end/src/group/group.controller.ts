@@ -10,10 +10,13 @@ import {
   Req,
   Request,
   Query,
+  NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { GroupService } from './group.service';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { Types } from 'mongoose';
 import { Group } from './schema/group.schema';
 
 @Controller('group')
@@ -66,5 +69,19 @@ export class GroupController {
   async rejectJoinRequest(@Req() req: any, @Param('groupId') groupId: string) {
     const userId = req.user.userId;
     return await this.groupService.rejectJoinRequest(userId, groupId);
+  }
+
+  // ===== THÊM ENDPOINT NÀY VÀO ===== Nam thêm
+  @UseGuards(JwtAuthGuard)
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException('ID nhóm không hợp lệ');
+    }
+    const group = await this.groupService.findById(id); // Giả sử bạn có hàm findById trong service
+    if (!group) {
+      throw new NotFoundException('Không tìm thấy nhóm');
+    }
+    return group;
   }
 }

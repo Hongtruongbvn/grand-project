@@ -1,26 +1,20 @@
 import { Injectable } from '@nestjs/common';
-import { CreateChatroomMemberDto } from './dto/create-chatroom-member.dto';
-import { UpdateChatroomMemberDto } from './dto/update-chatroom-member.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { ChatroomMember } from './schema/chatroom-member.schema';
+import { Model, Types } from 'mongoose';
 
 @Injectable()
 export class ChatroomMemberService {
-  create(createChatroomMemberDto: CreateChatroomMemberDto) {
-    return 'This action adds a new chatroomMember';
-  }
-
-  findAll() {
-    return `This action returns all chatroomMember`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} chatroomMember`;
-  }
-
-  update(id: number, updateChatroomMemberDto: UpdateChatroomMemberDto) {
-    return `This action updates a #${id} chatroomMember`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} chatroomMember`;
+  constructor(
+    @InjectModel(ChatroomMember.name)
+    private chatMemberModel: Model<ChatroomMember>,
+  ) {}
+  async addMember(chatroom_id: string, user_id: string, role) {
+    const member = new this.chatMemberModel({
+      chatroom_id: new Types.ObjectId(chatroom_id),
+      user_id: new Types.ObjectId(user_id),
+      role,
+    });
+    return await member.save();
   }
 }

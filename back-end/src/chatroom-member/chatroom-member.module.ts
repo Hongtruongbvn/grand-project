@@ -15,5 +15,6 @@ import {
   ],
   controllers: [ChatroomMemberController],
   providers: [ChatroomMemberService],
+  exports: [ChatroomMemberService],
 })
 export class ChatroomMemberModule {}

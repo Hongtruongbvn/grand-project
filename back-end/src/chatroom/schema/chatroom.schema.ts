@@ -9,7 +9,11 @@ export class Chatroom {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   owner: Types.ObjectId;
 
-  @Prop({ required: true, enum: ['public', 'private', 'group'] }) // enum giả định
+  @Prop({
+    required: true,
+    enum: ['public', 'private', 'group'],
+    default: 'private',
+  })
   type: 'public' | 'private' | 'group';
 }
 

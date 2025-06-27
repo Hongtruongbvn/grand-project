@@ -12,6 +12,8 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { GlobalRoleService } from 'src/global-role/global-role.service';
 import { InterestService } from 'src/interest/interest.service';
 import { MailService } from 'src/mail/mail.service';
+import { ChatroomService } from 'src/chatroom/chatroom.service';
+import { ChatroomMemberService } from 'src/chatroom-member/chatroom-member.service';
 
 @Injectable()
 export class UserService {
@@ -20,6 +22,8 @@ export class UserService {
     private readonly globalRoleService: GlobalRoleService,
     private readonly interestService: InterestService,
     private readonly mailService: MailService,
+    private readonly chatroomService: ChatroomService,
+    private readonly chatmemberService: ChatroomMemberService,
   ) {}
   async register(createUserDto: CreateUserDto): Promise<User> {
     try {
@@ -87,11 +91,15 @@ export class UserService {
     return this.userModel.findById(userId).exec();
   }
 
-  async searchByName(name: string): Promise<User[]> { // Tìm kiếm người dùng theo tên===Nam thêm
+  async searchByName(name: string): Promise<User[]> {
+    // Tìm kiếm người dùng theo tên===Nam thêm
     if (!name) return [];
     // Tìm user có username chứa chuỗi query, không phân biệt hoa thường
-    return this.userModel.find({ username: { $regex: name, $options: 'i' } }).limit(10).exec();
-}
+    return this.userModel
+      .find({ username: { $regex: name, $options: 'i' } })
+      .limit(10)
+      .exec();
+  }
 
   async updateProfile(userId: string, updateDto: UpdateUserDto) {
     await this.userModel.updateOne({ _id: userId }, { $set: updateDto });
@@ -201,7 +209,17 @@ export class UserService {
 
     await currentUser.save();
     await requester.save();
-
+    const chatroom = await this.chatroomService.createFriendChat(
+      'Friend Chat',
+      currentUserId,
+      'private',
+    );
+    const chatroom_id = chatroom._id.toString();
+    await this.chatmemberService.addMember(
+      chatroom_id,
+      requesterObjectId.toString(),
+      'member',
+    );
     return { message: 'Friend request accepted' };
   }
   async removeFriend(currentUserId: string, friendId: string) {

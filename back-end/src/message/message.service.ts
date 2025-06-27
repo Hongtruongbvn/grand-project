@@ -1,26 +1,29 @@
-import { Injectable } from '@nestjs/common';
-import { CreateMessageDto } from './dto/create-message.dto';
-import { UpdateMessageDto } from './dto/update-message.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Message } from './schema/message.schema';
+import { Types, Model } from 'mongoose';
+import { ChatroomMemberService } from 'src/chatroom-member/chatroom-member.service';
 
 @Injectable()
 export class MessageService {
-  create(createMessageDto: CreateMessageDto) {
-    return 'This action adds a new message';
-  }
+  constructor(
+    @InjectModel(Message.name) private readonly messageModel: Model<Message>,
+    private readonly chatMemberService: ChatroomMemberService,
+  ) {}
+  async sendMessage(user_id: string, group_id: string, content: string) {
+    const member = await this.chatMemberService.findMem(user_id, group_id);
+    if (!member || !member.isActive) {
+      throw new NotFoundException(
+        'User is not an active member of the chatroom',
+      );
+    }
 
-  findAll() {
-    return `This action returns all message`;
-  }
+    const message = await this.messageModel.create({
+      content,
+      room_id: new Types.ObjectId(group_id),
+      sender_id: new Types.ObjectId(user_id),
+    });
 
-  findOne(id: number) {
-    return `This action returns a #${id} message`;
-  }
-
-  update(id: number, updateMessageDto: UpdateMessageDto) {
-    return `This action updates a #${id} message`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} message`;
+    return message;
   }
 }

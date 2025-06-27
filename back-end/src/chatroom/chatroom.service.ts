@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Chatroom } from './schema/chatroom.schema';
 import { Model, Types } from 'mongoose';
@@ -17,5 +17,12 @@ export class ChatroomService {
 
     const newchat = await chatroom.save();
     return newchat;
+  }
+  async findOne(id: string) {
+    const find = await this.chatroomModel.findById(id);
+    if (!find) {
+      throw new NotFoundException('not found this chat room');
+    }
+    return find;
   }
 }

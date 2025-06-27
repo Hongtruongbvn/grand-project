@@ -14,6 +14,7 @@ import { InterestService } from 'src/interest/interest.service';
 import { MailService } from 'src/mail/mail.service';
 import { ChatroomService } from 'src/chatroom/chatroom.service';
 import { ChatroomMemberService } from 'src/chatroom-member/chatroom-member.service';
+import { NotificationService } from 'src/notification/notification.service';
 
 @Injectable()
 export class UserService {
@@ -24,6 +25,7 @@ export class UserService {
     private readonly mailService: MailService,
     private readonly chatroomService: ChatroomService,
     private readonly chatmemberService: ChatroomMemberService,
+    private readonly notiService: NotificationService,
   ) {}
   async register(createUserDto: CreateUserDto): Promise<User> {
     try {
@@ -172,6 +174,11 @@ export class UserService {
     }
 
     toUser.acceptFriend.push(fromUserId);
+    await this.notiService.createNoTi(
+      'new request friend',
+      toUserId,
+      fromUserId,
+    );
     await toUser.save();
 
     return { message: 'Friend request sent successfully' };

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
@@ -8,10 +8,12 @@ import { InterestModule } from 'src/interest/interest.module';
 import { MailService } from 'src/mail/mail.service';
 import { ChatroomModule } from 'src/chatroom/chatroom.module';
 import { ChatroomMemberModule } from 'src/chatroom-member/chatroom-member.module';
+import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
   imports: [
-    ChatroomMemberModule,
+    NotificationModule,
+    forwardRef(() => ChatroomMemberModule), // 👈 fix vòng lặp ở đây
     ChatroomModule,
     GlobalRoleModule,
     InterestModule,

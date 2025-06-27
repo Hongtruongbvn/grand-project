@@ -7,6 +7,7 @@ import { UserService } from 'src/user/user.service';
 import { GroupMemberService } from 'src/group-member/group-member.service';
 import { NotificationService } from 'src/notification/notification.service';
 import { GroupRoleService } from 'src/group-role/group-role.service';
+import { ChatroomService } from 'src/chatroom/chatroom.service';
 
 @Injectable()
 export class GroupService {
@@ -16,6 +17,7 @@ export class GroupService {
     private readonly groupMemService: GroupMemberService,
     private readonly notificationService: NotificationService,
     private readonly groupRoleService: GroupRoleService,
+    private readonly chatRoomService: ChatroomService,
   ) {}
 
   async create(
@@ -28,6 +30,7 @@ export class GroupService {
       owner: ownerObjectId, // Nam sửa
       members: [ownerObjectId], // Nam thêm
     });
+    await this.chatRoomService.createFriendChat(created.name, ownerId, 'group');
     return created.save();
   }
 

@@ -17,7 +17,6 @@ import { GroupService } from './group.service';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { Types } from 'mongoose';
-import { Group } from './schema/group.schema';
 
 @Controller('group')
 export class GroupController {

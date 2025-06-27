@@ -6,10 +6,13 @@ import { User, UserSchema } from './schema/user.schema';
 import { GlobalRoleModule } from 'src/global-role/global-role.module';
 import { InterestModule } from 'src/interest/interest.module';
 import { MailService } from 'src/mail/mail.service';
+import { ChatroomModule } from 'src/chatroom/chatroom.module';
+import { ChatroomMemberModule } from 'src/chatroom-member/chatroom-member.module';
 
 @Module({
   imports: [
-    
+    ChatroomMemberModule,
+    ChatroomModule,
     GlobalRoleModule,
     InterestModule,
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),

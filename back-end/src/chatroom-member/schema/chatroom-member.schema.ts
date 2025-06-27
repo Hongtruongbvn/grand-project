@@ -8,7 +8,11 @@ export class ChatroomMember {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   user_id: Types.ObjectId;
 
-  @Prop({ required: true, enum: ['admin', 'member', 'viewer'] }) // enum giả định
+  @Prop({
+    required: true,
+    enum: ['admin', 'member', 'viewer'],
+    default: 'member',
+  }) // enum giả định
   role: string;
 
   @Prop({ default: true })

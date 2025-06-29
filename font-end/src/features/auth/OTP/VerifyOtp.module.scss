@@ -1,0 +1,206 @@
+// src/features/auth/OTP/VerifyOtp.module.scss - PHIÊN BẢN HOÀN CHỈNH
+
+// --- KEYFRAMES ANIMATIONS ---
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeSuccess {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+
+// --- MAIN PAGE STYLES ---
+.verifyPage {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(to right, #e3f2a5, #a8d8a2);
+  font-family: Arial, sans-serif;
+}
+
+.card {
+  width: 90%;
+  max-width: 900px;
+  min-height: 500px;
+  display: flex;
+  border-radius: 1.1rem;
+  overflow: hidden;
+  background-color: white;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  animation: fadeInUp 0.6s ease-out forwards;
+  opacity: 0;
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+
+  &:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 30px rgba(31, 94, 71, 0.25);
+  }
+}
+
+// --- LEFT COLUMN ---
+.left {
+  flex: 1.2;
+  background: linear-gradient(rgba(44, 125, 95, 0.7), rgba(31, 94, 71, 0.9)),
+    url("https://images.pexels.com/photos/3184436/pexels-photo-3184436.jpeg?auto=compress&cs=tinysrgb&w=1600")
+      center / cover no-repeat;
+  padding: 40px;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: 20px;
+
+  h1 {
+    font-size: 48px;
+    font-weight: bold;
+  }
+
+  p {
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+}
+
+// --- RIGHT COLUMN ---
+.right {
+  flex: 1;
+  padding: 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  h2 {
+    font-size: 28px;
+    font-weight: 600;
+    color: #1f5e47;
+    margin-bottom: 30px;
+  }
+  
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+    max-width: 350px;
+  }
+
+  .errorMessage {
+    color: #e63946;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-align: center;
+  }
+
+  .successMessage {
+    color: #1f7a54;
+    background-color: #dcfce7;
+    border: 1px solid #b6e4c7;
+    padding: 10px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-align: center;
+    animation: fadeSuccess 0.5s ease-in-out;
+  }
+
+  input {
+    padding: 12px 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    background-color: #f7f7f7;
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+
+    &:hover {
+      border-color: #9dc891;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: #1f5e47;
+    }
+  }
+
+  button {
+    padding: 12px;
+    background-color: #1f5e47;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.15s ease;
+
+    &:hover {
+      background-color: #174c3a;
+      transform: scale(1.02);
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
+    
+    &:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// --- RESPONSIVE DESIGN ---
+@media (max-width: 960px) {
+  .card {
+    flex-direction: column;
+
+    .left, .right {
+      width: 100%;
+      flex: unset;
+      padding: 30px;
+    }
+
+    .left {
+      height: 250px;
+      justify-content: center;
+
+      h1 {
+        font-size: 32px;
+      }
+
+      p {
+        font-size: 0.9rem;
+      }
+    }
+
+    .right {
+        padding: 40px 30px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .card .left {
+    display: none; // Ẩn cột trái trên điện thoại nhỏ
+  }
+  .card .right {
+    padding: 20px;
+  }
+}

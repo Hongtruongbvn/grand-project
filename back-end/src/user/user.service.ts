@@ -355,4 +355,14 @@ export class UserService {
       })
       .exec();
   }
+
+  // ===== THÊM HÀM MỚI NÀY VÀO =====
+  // Hàm này sẽ được gọi từ ChatGateway để cập nhật trạng thái
+  async updateStatus(userId: string, isOnline: boolean): Promise<User | null> {
+    return this.userModel.findByIdAndUpdate(
+      userId,
+      { $set: { online_status: isOnline } },
+      { new: true }, // Trả về document đã được cập nhật
+    ).exec();
+  }
 }

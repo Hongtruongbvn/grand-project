@@ -1,0 +1,22 @@
+// src/Components/layout/MainLayout.module.scss
+.appLayout {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  background-color: #313338; // Nền tối đặc trưng của Discord
+  color: #fff;
+}
+
+.mainWrapper {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  height: 100vh;
+}
+
+.content {
+  flex-grow: 1;
+  overflow-y: auto; // Cho phép cuộn nội dung chính
+  background-color: #f2f3f5; // Nền sáng cho khu vực mạng xã hội
+  color: #000;
+}

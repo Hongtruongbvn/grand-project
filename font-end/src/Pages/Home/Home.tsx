@@ -1,9 +1,9 @@
 import styles from "./Home.module.scss";
 import Navbar from "../../Components/navbar/navbar"; // Đảm bảo đúng đường dẫn
-import FriendList from "../Friend/FriendList";
-import GroupList from "../Group/GroupList"; // Đảm bảo đúng đường dẫn
-import CreatePost from "../Post/CreatePost"; // <-- Import component mới
-import PostList from "../Post/PostList";     // <-- Import component mới
+import FriendList from "../../Friend/FriendList";
+import GroupList from "../../Group/GroupList"; // Đảm bảo đúng đường dẫn
+import CreatePost from "../../Post/CreatePost"; // <-- Import component mới
+import PostList from "../../Post/PostList";     // <-- Import component mới
 import { useState } from "react";
 
 const Home = () => {

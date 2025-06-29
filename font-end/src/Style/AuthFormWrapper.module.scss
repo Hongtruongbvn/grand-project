@@ -1,0 +1,47 @@
+// src/features/auth/AuthFormWrapper.module.scss - PHIÊN BẢN NÂNG CẤP
+
+.authFormWrapper {
+  // --- Kế thừa từ code của bạn: Bố cục chính và hiệu ứng ---
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 40px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 6px 15px rgba(44, 125, 95, 0.2);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 10px 25px rgba(44, 125, 95, 0.4);
+    transform: translateY(-5px);
+  }
+
+  // --- Style cho tiêu đề (H1) bên trong wrapper ---
+  .title {
+    font-size: 28px; // Tăng kích thước cho nổi bật
+    font-weight: 600;
+    margin-bottom: 25px; // Tăng khoảng cách với form
+    color: #2c7d5f;
+    text-align: center;
+    transition: color 0.3s ease;
+
+    // Hiệu ứng hover cho title từ code của bạn
+    &:hover {
+      color: #08ed99;
+    }
+  }
+
+  // --- Style cho thẻ <form> được truyền vào (children) ---
+  // Sử dụng :global để style cho các phần tử con không phải module
+  :global {
+    form {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        gap: 15px; // Khoảng cách giữa các input
+    }
+  }
+}

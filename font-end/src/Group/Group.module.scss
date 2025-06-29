@@ -1,0 +1,77 @@
+// src/Components/group/Group.module.scss - ĐÃ NÂNG CẤP
+
+// BƯỚC 1: Import module `color` của Sass để sử dụng các hàm màu hiện đại
+@use 'sass:color';
+
+// --- Các biến màu của bạn được giữ nguyên ---
+$background-secondary: #2b2d31;
+$text-normal: #dcddde;
+$text-muted: #949ba4;
+$status-online: #23a559;
+$status-offline: #80848e;
+
+.memberList {
+  width: 240px;
+  flex-shrink: 0;
+  background-color: $background-secondary;
+  padding: 16px 8px;
+  overflow-y: auto;
+
+  h4 {
+    color: $text-muted;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    padding: 0 8px;
+    margin-bottom: 8px;
+  }
+}
+
+.memberGroup {
+    margin-bottom: 20px;
+}
+
+.memberItem {
+  display: flex;
+  align-items: center;
+  padding: 6px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  position: relative;
+  
+  &:hover {
+    // BƯỚC 2: Thay thế hàm lighten() cũ bằng color.adjust() mới
+    // Hàm này sẽ tăng độ sáng của màu nền lên 5%
+    background-color: color.adjust($background-secondary, $lightness: 5%);
+  }
+
+  img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    margin-right: 12px;
+  }
+
+  span {
+    color: $text-normal;
+    font-weight: 500;
+  }
+}
+
+.statusDot {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid $background-secondary;
+
+  &.online {
+    background-color: $status-online;
+  }
+
+  &.offline {
+    background-color: $status-offline;
+  }
+}

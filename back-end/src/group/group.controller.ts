@@ -43,6 +43,14 @@ export class GroupController {
   async findAll() {
     return this.groupService.findAll();
   }
+  //Nam thêm
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  async getMyGroups(@Req() req: any) {
+    const userId = req.user.userId;
+    return this.groupService.findMyGroups(userId);
+  }
+
   @UseGuards(JwtAuthGuard)
   @Post('add-member/:receiverId/:groupId')
   async addMemberToGroup(
@@ -77,12 +85,11 @@ export class GroupController {
     if (!Types.ObjectId.isValid(id)) {
       throw new BadRequestException('ID nhóm không hợp lệ');
     }
-    const group = await this.groupService.findById(id); // Giả sử bạn có hàm findById trong service
-    if (!group) {
-      throw new NotFoundException('Không tìm thấy nhóm');
-    }
+    const group = await this.groupService.findById(id);
+    // Không cần kiểm tra not found ở đây nữa vì Service đã làm rồi
     return group;
   }
+
   @UseGuards(JwtAuthGuard)
   @Post('request-join/:groupId')
   async requestJoinGroup(@Req() req: any, @Param('groupId') groupId: string) {

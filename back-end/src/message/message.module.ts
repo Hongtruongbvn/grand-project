@@ -4,9 +4,11 @@ import { MessageController } from './message.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Message, MessageSchema } from './schema/message.schema';
 import { ChatroomMemberModule } from 'src/chatroom-member/chatroom-member.module';
+import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
   imports: [
+    NotificationModule,
     ChatroomMemberModule,
     MongooseModule.forFeature([{ name: Message.name, schema: MessageSchema }]),
   ],

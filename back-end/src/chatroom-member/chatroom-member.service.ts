@@ -80,4 +80,12 @@ export class ChatroomMemberService {
     }
     return find;
   }
+  async userInRoom(room_id: string) {
+    const members = await this.chatMemberModel
+      .find({ chatroom_id: room_id, isActive: true })
+      .populate('user_id') // populate nếu cần
+      .exec();
+
+    return members;
+  }
 }

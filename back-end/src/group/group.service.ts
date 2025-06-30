@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Group } from './schema/group.schema';
@@ -224,4 +224,26 @@ export class GroupService {
       throw new NotFoundException('You are not the owner of this group');
     }
   }
+
+    async suggestGroupsForUser(userId: string): Promise<Group[]> {
+    if (!Types.ObjectId.isValid(userId)) {
+    throw new BadRequestException('ID người dùng không hợp lệ');
+  }
+
+    const user = await this.userService.findById(userId);
+    if (!user) throw new NotFoundException('User not found');
+
+    const suggestedGroups = await this.groupModel
+    .find({
+      interest_id: { $in: user.interest_id },
+    })
+    .populate('owner', 'username avatar')
+    .populate('channels', '_id name')
+    .populate('interest_id', 'name')
+    .exec();
+
+
+    return suggestedGroups;
+  }
+
 }

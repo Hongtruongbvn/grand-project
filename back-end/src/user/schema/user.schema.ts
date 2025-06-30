@@ -45,8 +45,9 @@ export class User extends Document {
   @Prop({ type: [Types.ObjectId], ref: 'Interest', default: [] }) //sửa cho hiện nhiều sở thích thay vì 1
   interest_id: Types.ObjectId[];
 
-  @Prop({ type: Types.ObjectId, ref: 'User' })
+  @Prop({ type: [Types.ObjectId], ref: 'User', default: [] })
   friend_id: Types.ObjectId[];
+
 
   @Prop()
   acceptFriend: string[];

@@ -28,6 +28,19 @@ export class GroupController {
     return await this.groupService.create(createGroupDto, ownerId);
   }
 
+   @UseGuards(JwtAuthGuard)
+    @Get('suggest')
+    async suggestGroups(@Req() req: any) {
+    const userId = req.user.userId;
+  
+
+    if (!Types.ObjectId.isValid(userId)) {
+    throw new BadRequestException('ID người dùng không hợp lệ');
+    }
+
+    return await this.groupService.suggestGroupsForUser(userId);
+  }
+
   @UseGuards(JwtAuthGuard)
   @Patch(':id/add-interest/:interestId')
   async addInterest(
@@ -113,4 +126,8 @@ export class GroupController {
       senderId,
     );
   }
+
+ 
+
+
 }

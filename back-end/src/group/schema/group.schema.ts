@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Types, Schema as MongooseSchema } from 'mongoose';
+import mongoose, { Types, Schema as MongooseSchema } from 'mongoose';
 
 @Schema({ timestamps: true })
 export class Group {
@@ -26,6 +26,9 @@ export class Group {
 
   @Prop({ type: [MongooseSchema.Types.ObjectId], ref: 'Interest', default: [] })
   interest_id: Types.ObjectId[];
+
+  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Channel' }] })
+  channels: Types.ObjectId[];  
 }
 
 export const GroupSchema = SchemaFactory.createForClass(Group);

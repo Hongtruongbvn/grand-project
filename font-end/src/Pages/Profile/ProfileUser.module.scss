@@ -1,0 +1,127 @@
+// src/pages/ProfileUser/ProfileUser.module.scss
+@use "../auth/Login/Login.module.scss"; // Tái sử dụng animations và biến màu
+
+.profileUserPage {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background: linear-gradient(to right, #e3f2a5, #a8d8a2);
+}
+
+.loading, .error {
+  color: #1f5e47;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.profileCard {
+  width: 90%;
+  max-width: 800px;
+  background: white;
+  border-radius: 1.1rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.avatarSection {
+  background: linear-gradient(rgba(44, 125, 95, 0.8), rgba(31, 94, 71, 0.95));
+  color: white;
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+
+  .avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 5px solid #e3f2a5;
+    object-fit: cover;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  }
+
+  h2 {
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 0;
+  }
+  
+  .email {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+    opacity: 0.9;
+  }
+
+  .editBtn {
+    padding: 10px 25px;
+    border: none;
+    background-color: #e3f2a5;
+    color: #1f5e47;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background-color: #c5d47e;
+      transform: translateY(-3px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+  }
+}
+
+.infoGrid {
+  padding: 30px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.infoItem, .infoItemFull {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-size: 1rem;
+  color: #333;
+
+  svg {
+    color: #2c7d5f;
+    font-size: 1.5rem;
+  }
+}
+
+.infoItemFull {
+  grid-column: 1 / -1;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.interestTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 5px;
+  
+  .tag {
+    background-color: #e3f2a5;
+    color: #1f5e47;
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+}

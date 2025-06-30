@@ -75,15 +75,13 @@ export class ChatroomMemberService {
       user_id: new Types.ObjectId(user_id),
       chatroom_id: new Types.ObjectId(group_id),
     });
-    if (!find) {
-      throw new BadRequestException('not found this member');
-    }
+
     return find;
   }
   async userInRoom(room_id: string) {
     const members = await this.chatMemberModel
-      .find({ chatroom_id: room_id, isActive: true })
-      .populate('user_id') // populate nếu cần
+      .find({ chatroom_id: new Types.ObjectId(room_id), isActive: true }) // 👈 ép kiểu đúng
+      .populate('user_id')
       .exec();
 
     return members;

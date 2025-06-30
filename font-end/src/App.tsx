@@ -1,41 +1,31 @@
-// src/App.tsx - PHIÊN BẢN NÂNG CẤP HOÀN CHỈNH
-import { Route, Routes, Navigate } from 'react-router-dom';
-import MainLayout from './Components/layout/MainLayout'; // Bố cục chính mới
-
-// Import các trang của bạn
-import Login from './features/auth/Login/Login';
-import Register from './features/auth/Register/Register';
+// import React from 'react';
+import { Route, Routes } from 'react-router-dom';
+import Login from './Pages/auth/Login/Login';
+import Register from './Pages/auth/Register/Register';
+import ForgotPassword from './Pages/ForgotPassword/ForgotPassword';
 import Home from './Pages/Home/Home';
-import ProfileUser from './Profile/ProfileUser';
-import GroupPage from './Group/GroupPage';
-import GroupDetailPage from './Pages/Home/GroupDetailPage'; // Trang mới kiểu Discord
-import ForgotPassword from './features/auth/ForgotPassword/ForgotPassword';
-import ResetPassword from './features/auth/ForgotPassword/ResetPassword';
-import VerifyOtp from './features/auth/OTP/VerifyOtp';
+import ProfileUser from './Pages/Profile/ProfileUser';
+import ResetPassword from './Pages/ForgotPassword/ResetPassword';
+import VerifyOtp from './Pages/OTP/VerifyOtp';
+import InterestSelection from './Pages/Interests/SelectInterests';
+import EditProfile from './Pages/Profile/EditProfile';
+import GroupPage from './Pages/Group/GroupPage';
 
 const App = () => {
   return (
     <Routes>
-      {/* Các trang không cần đăng nhập */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/verify-otp" element={<VerifyOtp />} />
-
-      {/* Các trang cần đăng nhập sẽ được bao bọc bởi MainLayout */}
-      <Route path="/" element={<MainLayout />}>
-        {/* Route mặc định sẽ điều hướng đến /home */}
-        <Route index element={<Navigate to="/home" replace />} />
-        
-        {/* Giao diện Mạng xã hội */}
-        <Route path="home" element={<Home />} />
-        <Route path="profile/:userId" element={<ProfileUser />} />
-        <Route path="group/:groupId" element={<GroupPage />} />
-        
-        {/* Giao diện Discord */}
-        <Route path="channels/:groupId/:channelId" element={<GroupDetailPage />} />
-      </Route>
+      <Route path="/reset-password" element={<ResetPassword />} />
+      {/* Route chính sau khi đăng nhập */}
+      {/* <Route path="/" element={<div className="text-center p-10">Welcome to Social App 🚀</div>} /> */}
+      <Route path='/select-interest' element={<InterestSelection />} />
+      <Route path="/home" element={<Home />} />
+      <Route path="/profile" element={<ProfileUser />} />
+      <Route path="/edit-profile" element={<EditProfile />} />
+      <Route path="/group/:groupId" element={<GroupPage />} />
     </Routes>
   );
 };

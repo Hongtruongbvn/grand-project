@@ -1,61 +1,37 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { Group, Channel } from './schema/group.schema';
+import { Group } from './schema/group.schema';
 import { Model, Types } from 'mongoose';
 import { UserService } from 'src/user/user.service';
 import { GroupMemberService } from 'src/group-member/group-member.service';
 import { NotificationService } from 'src/notification/notification.service';
 import { GroupRoleService } from 'src/group-role/group-role.service';
-// import { ChatroomService } from 'src/chatroom/chatroom.service';
+import { ChatroomService } from 'src/chatroom/chatroom.service';
 
 @Injectable()
 export class GroupService {
   constructor(
     @InjectModel(Group.name) private groupModel: Model<Group>,
-    @InjectModel(Channel.name) private channelModel: Model<Channel>, // Nam Thêm
     private readonly userService: UserService,
     private readonly groupMemService: GroupMemberService,
     private readonly notificationService: NotificationService,
     private readonly groupRoleService: GroupRoleService,
-    // private readonly chatRoomService: ChatroomService,
+    private readonly chatRoomService: ChatroomService,
   ) {}
 
   async create(
     createGroupDto: CreateGroupDto,
     ownerId: string,
   ): Promise<Group> {
-    const ownerObjectId = new Types.ObjectId(ownerId);
-    
-    // 1. Tạo nhóm mới
-    const newGroup = new this.groupModel({
+    const ownerObjectId = new Types.ObjectId(ownerId); //nam thêm
+    const created = new this.groupModel({
       ...createGroupDto,
-      owner: ownerObjectId,
-      members: [ownerObjectId],
+      owner: ownerObjectId, // Nam sửa
+      members: [ownerObjectId], // Nam thêm
     });
-    
-    // 2. Tự động tạo một kênh chat mặc định
-    const generalChannel = new this.channelModel({
-        name: 'general',
-        group_id: newGroup._id,
-    });
-    await generalChannel.save();
-
-    // 3. Thêm ID của kênh vào nhóm
-    // SỬA LỖI: Ép kiểu `_id` thành `Types.ObjectId` để TypeScript không báo lỗi
-    newGroup.channels = [generalChannel._id as Types.ObjectId];
-
-    // 4. Lưu lại group hoàn chỉnh
-    return newGroup.save();
-  }
-
-    // ===== HÀM MỚI: Lấy tất cả các nhóm mà một người dùng tham gia ===== // Nam thêm
-  // Hàm này rất quan trọng cho thanh sidebar bên trái
-  async findMyGroups(userId: string): Promise<Group[]> {
-    return this.groupModel.find({ members: userId })
-      .select('name icon channels') // Chỉ lấy các trường cần thiết
-      .populate('channels', '_id name') // Lấy thông tin kênh để điều hướng
-      .exec();
+    await this.chatRoomService.createFriendChat(created.name, ownerId, 'group');
+    return created.save();
   }
 
   async addInterestToGroup(
@@ -111,14 +87,11 @@ export class GroupService {
   }
 
   // ===== THÊM HÀM NÀY VÀO ===== Nam thêm
- async findById(id: string): Promise<Group> {
+  async findById(id: string): Promise<Group> {
     const group = await this.groupModel
       .findById(id)
-      .populate('owner', 'username avatar') // Giữ nguyên
-      .populate('members', 'username avatar') // Giữ nguyên
-      .populate('channels', '_id name') // <-- THÊM DÒNG NÀY VÀO
+      .populate('owner members', 'username avatar')
       .exec();
-      
     if (!group) {
       throw new NotFoundException('Group not found');
     }

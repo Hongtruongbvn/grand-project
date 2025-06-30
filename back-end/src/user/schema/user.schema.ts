@@ -62,9 +62,6 @@ export class User extends Document {
 
   @Prop()
   pendingNewEmail?: string;
-
-  @Prop({ type: Boolean, default: false }) // Nam thêm
-  online_status: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

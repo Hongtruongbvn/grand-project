@@ -1,0 +1,32 @@
+// ✅ Hover cho Auth wrapper và title
+.authLoginWrapper {
+  max-width: 400px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 6px 15px rgba(44, 125, 95, 0.2);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 10px 25px rgba(44, 125, 95, 0.4);
+    transform: translateY(-5px);
+  }
+}
+
+.authLoginTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #2c7d5f;
+  transition: color 0.3s ease;
+
+  &:hover {
+    color: #08ed99;
+  }
+}

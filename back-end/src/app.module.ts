@@ -23,6 +23,7 @@ import { GroupRoleModule } from './group-role/group-role.module';
 import { GroupMemberModule } from './group-member/group-member.module';
 import { NotificationModule } from './notification/notification.module';
 import { ChatroomMemberModule } from './chatroom-member/chatroom-member.module';
+import { FriendRequestModule } from './friend-request/friend-request.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { ChatroomMemberModule } from './chatroom-member/chatroom-member.module';
     NotificationModule,
     ChatroomMemberModule,
     SearchModule, // Nam thêm
+    FriendRequestModule,
   ],
   controllers: [AppController],
   providers: [AppService],

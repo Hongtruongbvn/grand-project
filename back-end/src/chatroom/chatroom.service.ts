@@ -25,5 +25,17 @@ export class ChatroomService {
     }
     return find;
   }
- 
+  async isOwner(user_id: string, group_id: string): Promise<boolean> {
+    if (!Types.ObjectId.isValid(user_id) || !Types.ObjectId.isValid(group_id)) {
+      throw new NotFoundException('Invalid user_id or group_id');
+    }
+
+    const chatroom = await this.chatroomModel.findById(group_id).exec();
+
+    if (!chatroom) {
+      throw new NotFoundException('Chatroom not found');
+    }
+
+    return chatroom.owner.toString() === user_id;
+  }
 }

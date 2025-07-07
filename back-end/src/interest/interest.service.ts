@@ -3,7 +3,7 @@ import { CreateInterestDto } from './dto/create-interest.dto';
 import { UpdateInterestDto } from './dto/update-interest.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Interest } from './schema/interest.schema';
-import { Model, Types } from 'mongoose';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class InterestService {
@@ -19,7 +19,6 @@ export class InterestService {
     return allInterest;
   }
   async findByIds(ids: string[]): Promise<Interest[]> {
-    const objectIds = ids.map((id) => new Types.ObjectId(id));
     return this.interestModel.find({ _id: { $in: ids } });
   }
 }

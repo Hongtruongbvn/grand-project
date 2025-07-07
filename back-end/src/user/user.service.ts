@@ -2,9 +2,11 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  forwardRef,
+  Inject,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { User } from './schema/user.schema';
+import { User, UserDocument } from './schema/user.schema';
 import { Model, Types } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -19,14 +21,16 @@ import { NotificationService } from 'src/notification/notification.service';
 @Injectable()
 export class UserService {
   constructor(
-    @InjectModel(User.name) private userModel: Model<User>,
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
     private readonly globalRoleService: GlobalRoleService,
     private readonly interestService: InterestService,
     private readonly mailService: MailService,
+    @Inject(forwardRef(() => ChatroomService))
     private readonly chatroomService: ChatroomService,
     private readonly chatmemberService: ChatroomMemberService,
     private readonly notiService: NotificationService,
   ) {}
+
   async register(createUserDto: CreateUserDto): Promise<User> {
     try {
       const hash = await bcrypt.hash(createUserDto.password, 10);
@@ -35,7 +39,7 @@ export class UserService {
         password: hash,
       });
       const savedUser = await createdUser.save();
-      await this.setDefaultRole(savedUser._id as string);
+      await this.setDefaultRole(savedUser._id.toString());
       return savedUser;
     } catch (error) {
       if (error.code === 11000) {
@@ -45,20 +49,35 @@ export class UserService {
         } else if (field === 'email') {
           throw new BadRequestException('Email đã được sử dụng');
         }
-        throw new BadRequestException('Thông tin đăng ký bị trùng lặp');
       }
-      throw error;
+      throw new BadRequestException('Thông tin đăng ký không hợp lệ');
     }
   }
-  async findByEmail(email: string): Promise<User | null> {
+
+  async findById(userId: string): Promise<UserDocument> {
+    const user = await this.userModel
+      .findById(userId)
+      .select('-password')
+      .exec();
+    if (!user) {
+      throw new NotFoundException(`Không tìm thấy người dùng với ID: ${userId}`);
+    }
+    return user;
+  }
+
+  async findByEmail(email: string): Promise<UserDocument | null> {
     return this.userModel.findOne({ email }).exec();
   }
 
-  async updateResetPasswordOtp(
-    email: string,
-    otp: string | null,
-    expiry: Date | null,
-  ) {
+  async searchByName(name: string): Promise<User[]> {
+    if (!name) return [];
+    return this.userModel
+      .find({ username: { $regex: name, $options: 'i' } })
+      .limit(10)
+      .exec();
+  }
+
+  async updateResetPasswordOtp(email: string, otp: string | null, expiry: Date | null) {
     return this.userModel.updateOne(
       { email },
       { resetPasswordOtp: otp, resetPasswordOtpExpiry: expiry },
@@ -77,224 +96,184 @@ export class UserService {
     );
   }
 
-  // Mã đã sửa (HIỂN THỊ ĐƯỢC SỞ THÍCH) Nam sửa
-  async findById(userId: string) {
-    const user = await this.userModel
-      .findById(userId)
-      .select('-password')
-      .populate('interest_id'); // <--- THÊM DÒNG NÀY ĐỂ LẤY THÔNG TIN CHI TIẾT CỦA SỞ THÍCH
+  async getFriendshipStatus(currentUserId: string, otherUserId: string): Promise<{ status: string }> {
+    const currentUser = await this.userModel.findById(currentUserId);
+    const otherUser = await this.userModel.findById(otherUserId);
 
-    if (!user) {
-      throw new Error('User not found');
-    }
-    return user;
-  }
-  async findOne(userId: string): Promise<User | null> {
-    return this.userModel.findById(userId).exec();
-  }
-
-  async searchByName(name: string): Promise<User[]> {
-    // Tìm kiếm người dùng theo tên===Nam thêm
-    if (!name) return [];
-    // Tìm user có username chứa chuỗi query, không phân biệt hoa thường
-    return this.userModel
-      .find({ username: { $regex: name, $options: 'i' } })
-      .limit(10)
-      .exec();
-  }
-
-  async updateProfile(userId: string, updateDto: UpdateUserDto) {
-    await this.userModel.updateOne({ _id: userId }, { $set: updateDto });
-    return this.findById(userId);
-  }
-  async setDefaultRole(userId: string) {
-    const role = await this.globalRoleService.findByName('user');
-
-    return this.userModel.updateOne(
-      { _id: userId },
-      { $set: { global_role_id: role?._id } },
-    );
-  }
-  async addInterestsToUser(userId: string, interestIds: string[]) {
-    const validInterests = await this.interestService.findByIds(interestIds);
-
-    if (validInterests.length !== interestIds.length) {
-      throw new BadRequestException('Một hoặc nhiều sở thích không hợp lệ');
+    if (!currentUser || !otherUser) {
+      throw new NotFoundException('Không tìm thấy người dùng.');
     }
 
-    return this.userModel.updateOne(
-      { _id: userId },
-      { $set: { interest_id: interestIds } },
-    );
-  }
-  async findUserByEmail(email: string) {
-    const user = await this.userModel.findOne({ email }).select('-password');
-    if (!user) {
-      throw new Error('User with this email not found');
+    if (currentUser.friend_id.some((id) => id.toString() === otherUserId)) {
+      return { status: 'friends' };
     }
-    return user;
-  }
-  async findByGender(gender: 'male' | 'female' | 'other') {
-    const users = await this.userModel.find({ gender }).select('-password');
-    if (!users || users.length === 0) {
-      throw new Error(`No users found with gender: ${gender}`);
+    if (otherUser.acceptFriend.some((id) => id.toString() === currentUserId)) {
+      return { status: 'request_sent' };
     }
-    return users;
+    if (currentUser.acceptFriend.some((id) => id.toString() === otherUserId)) {
+      return { status: 'request_received' };
+    }
+    return { status: 'not_friends' };
   }
-  async findByInterestIds(interestIds: Types.ObjectId[]) {
-    const users = await this.userModel
-      .find({ interest_id: { $in: interestIds } })
-      .select('-password');
 
-    if (!users || users.length === 0) {
-      throw new Error('No users found with the provided interest IDs');
+  async sendFriendRequest(fromUserId: string, toUserId: string): Promise<{ message: string }> {
+    if (fromUserId === toUserId) {
+      throw new BadRequestException('Bạn không thể gửi lời mời cho chính mình.');
     }
 
-    return users;
-  }
-  async sendFriendRequest(fromUserId: string, toUserId: string) {
     const toUser = await this.userModel.findById(toUserId);
-
     if (!toUser) {
-      throw new Error('User to send request to not found');
+      throw new NotFoundException('Không tìm thấy người dùng để gửi lời mời.');
     }
 
-    if (toUser.acceptFriend.includes(fromUserId)) {
-      throw new Error('Friend request already sent');
-    }
-    const fromObjectId = new Types.ObjectId(fromUserId);
+    const fromUserObjectId = new Types.ObjectId(fromUserId);
 
-    if (toUser.friend_id.some((id) => id.equals(fromObjectId))) {
-      throw new Error('This user already your friend');
-    }
-    const toUserIdStr = (toUser._id as Types.ObjectId).toString();
-
-    if (fromUserId === toUserIdStr) {
-      throw new Error('You cannot send a friend request to yourself');
+    if (toUser.friend_id.some((id) => id.equals(fromUserObjectId))) {
+      throw new BadRequestException('Người này đã là bạn của bạn.');
     }
 
-    toUser.acceptFriend.push(fromUserId);
+    if (toUser.acceptFriend.some((id) => id.equals(fromUserObjectId))) {
+      throw new BadRequestException('Bạn đã gửi lời mời kết bạn trước đó.');
+    }
+
+    toUser.acceptFriend.push(fromUserObjectId);
+    await toUser.save();
+
     await this.notiService.createNoTi(
-      'new request friend',
+      'đã gửi cho bạn lời mời kết bạn.',
       toUserId,
       fromUserId,
     );
-    await toUser.save();
 
-    return { message: 'Friend request sent successfully' };
+    return { message: 'Đã gửi lời mời kết bạn thành công' };
   }
-  async acceptFriendRequest(currentUserId: string, requesterId: string) {
+
+  async acceptFriendRequest(currentUserId: string, requesterId: string): Promise<{ message: string }> {
     const currentUser = await this.userModel.findById(currentUserId);
     const requester = await this.userModel.findById(requesterId);
-    console.log(requester);
-    console.log(currentUser);
 
     if (!currentUser || !requester) {
-      throw new Error('User not found');
+      throw new NotFoundException('Không tìm thấy người dùng.');
+    }
+
+    const requesterObjectId = new Types.ObjectId(requesterId);
+
+    if (!currentUser.acceptFriend.some(id => id.equals(requesterObjectId))) {
+      throw new BadRequestException('Không tìm thấy lời mời kết bạn từ người này.');
     }
 
     currentUser.acceptFriend = currentUser.acceptFriend.filter(
-      (id) => id !== requesterId,
+      (id) => !id.equals(requesterObjectId),
     );
 
-    const requesterObjectId = new Types.ObjectId(requesterId);
-    const currentUserObjectId = new Types.ObjectId(currentUserId);
-
-    currentUser.friend_id = Array.from(
-      new Set([
-        ...currentUser.friend_id.map((id) => id.toString()),
-        requesterObjectId.toString(),
-      ]),
-    ).map((id) => new Types.ObjectId(id));
-
-    requester.friend_id = Array.from(
-      new Set([
-        ...requester.friend_id.map((id) => id.toString()),
-        currentUserObjectId.toString(),
-      ]),
-    ).map((id) => new Types.ObjectId(id));
+    if (!currentUser.friend_id.some(id => id.equals(requesterObjectId))) {
+      currentUser.friend_id.push(requesterObjectId);
+    }
+    if (!requester.friend_id.some(id => id.equals(currentUser._id))) {
+      requester.friend_id.push(currentUser._id as Types.ObjectId);
+    }
 
     await currentUser.save();
     await requester.save();
-    const chatroom = await this.chatroomService.createFriendChat(
-      'Friend Chat',
-      currentUserId,
-      'private',
-    );
-    const chatroom_id = chatroom._id.toString();
-    await this.chatmemberService.addMember(
-      chatroom_id,
-      requesterObjectId.toString(),
-      'member',
-    );
-    return { message: 'Friend request accepted' };
+
+    await this.chatroomService.findOrCreatePrivateChat(currentUserId, requesterId);
+
+    return { message: 'Chấp nhận lời mời kết bạn thành công' };
   }
-  async removeFriend(currentUserId: string, friendId: string) {
-    if (
-      !Types.ObjectId.isValid(currentUserId) ||
-      !Types.ObjectId.isValid(friendId)
-    ) {
-      throw new Error('Invalid userId or friendId');
+
+  async rejectFriendRequest(currentUserId: string, requesterId: string): Promise<{ message: string }> {
+    const currentUser = await this.userModel.findById(currentUserId);
+    if (!currentUser) {
+      throw new NotFoundException('Không tìm thấy người dùng hiện tại');
     }
 
+    const initialRequestCount = currentUser.acceptFriend.length;
+
+    currentUser.acceptFriend = currentUser.acceptFriend.filter(
+      (id) => id.toString() !== requesterId,
+    );
+
+    if(currentUser.acceptFriend.length === initialRequestCount) {
+        throw new NotFoundException('Không tìm thấy lời mời kết bạn từ người này.');
+    }
+
+    await currentUser.save();
+    return { message: 'Đã từ chối lời mời kết bạn' };
+  }
+
+  async getPendingRequests(userId: string): Promise<User[]> {
+    const user = await this.userModel.findById(userId).populate({
+      path: 'acceptFriend',
+      select: 'username avatar',
+    });
+
+    if (!user) {
+      throw new NotFoundException('Không tìm thấy người dùng');
+    }
+    return user.acceptFriend as unknown as User[];
+  }
+
+  async getAllFriends(userId: string): Promise<User[]> {
+    const user = await this.userModel.findById(userId).populate({
+      path: 'friend_id',
+      select: '-password',
+    });
+
+    if (!user) {
+      throw new NotFoundException('Không tìm thấy người dùng');
+    }
+    return user.friend_id as unknown as User[];
+  }
+
+  async removeFriend(currentUserId: string, friendId: string): Promise<{ message: string }> {
     const currentUser = await this.userModel.findById(currentUserId);
     const friendUser = await this.userModel.findById(friendId);
 
     if (!currentUser || !friendUser) {
-      throw new Error('User not found');
+      throw new NotFoundException('Không tìm thấy người dùng.');
     }
 
     const friendObjectId = new Types.ObjectId(friendId);
     const currentUserObjectId = new Types.ObjectId(currentUserId);
 
-    currentUser.friend_id = currentUser.friend_id.filter(
-      (id) => !id.equals(friendObjectId),
-    );
-
-    friendUser.friend_id = friendUser.friend_id.filter(
-      (id) => !id.equals(currentUserObjectId),
-    );
-
-    currentUser.acceptFriend = currentUser.acceptFriend.filter(
-      (id) => id !== friendId,
-    );
-    friendUser.acceptFriend = friendUser.acceptFriend.filter(
-      (id) => id !== currentUserId,
-    );
+    currentUser.friend_id = currentUser.friend_id.filter((id) => !id.equals(friendObjectId));
+    friendUser.friend_id = friendUser.friend_id.filter((id) => !id.equals(currentUserObjectId));
 
     await currentUser.save();
     await friendUser.save();
 
-    return { message: 'Friend removed successfully' };
+    return { message: 'Đã hủy kết bạn thành công' };
   }
 
-  async rejectFriendRequest(currentUserId: string, requesterId: string) {
-    const currentUser = await this.userModel.findById(currentUserId);
-    if (!currentUser) {
-      throw new Error('Current user not found');
-    }
+  async updateProfile(userId: string, updateDto: UpdateUserDto): Promise<User> {
+    await this.userModel.updateOne({ _id: userId }, { $set: updateDto });
+    return this.findById(userId);
+  }
 
-    if (!currentUser.acceptFriend.includes(requesterId)) {
-      throw new Error('No friend request from this user to reject');
+  async setDefaultRole(userId: string) {
+    const role = await this.globalRoleService.findByName('user');
+    if (!role) {
+      console.error('Vai trò "user" mặc định không tồn tại.');
+      return;
     }
-
-    currentUser.acceptFriend = currentUser.acceptFriend.filter(
-      (id) => id !== requesterId,
+    return this.userModel.updateOne(
+      { _id: userId },
+      { $set: { global_role_id: role._id } },
     );
-
-    await currentUser.save();
-
-    return { message: 'Friend request rejected successfully' };
   }
 
-  async findByEmailWithInterests(email: string): Promise<User | null> {
-    return this.userModel
-      .findOne({ email })
-      .select('-password')
-      .populate('interest_id');
+  async addInterestsToUser(userId: string, interestIds: string[]) {
+    const validInterests = await this.interestService.findByIds(interestIds);
+    if (validInterests.length !== interestIds.length) {
+      throw new BadRequestException('Một hoặc nhiều sở thích không hợp lệ');
+    }
+    return this.userModel.updateOne(
+      { _id: userId },
+      { $set: { interest_id: interestIds.map(id => new Types.ObjectId(id)) } },
+    );
   }
 
-  async requestEmailChange(userId: string, newEmail: string) {
+  async requestEmailChange(userId: string, newEmail: string): Promise<{ message: string }> {
     const user = await this.userModel.findById(userId);
     if (!user) throw new BadRequestException('Người dùng không tồn tại');
 
@@ -319,7 +298,7 @@ export class UserService {
     return { message: 'OTP xác nhận đã gửi đến email hiện tại' };
   }
 
-  async confirmEmailChange(userId: string, otp: string) {
+  async confirmEmailChange(userId: string, otp: string): Promise<{ message: string }> {
     const user = await this.userModel.findById(userId);
     if (
       !user ||
@@ -338,21 +317,5 @@ export class UserService {
     await user.save();
 
     return { message: 'Email đã được cập nhật thành công' };
-  }
-  async getAllFriends(userId: string): Promise<User[]> {
-    const sender = await this.userModel.findById(userId).exec();
-    if (!sender) throw new NotFoundException('Sender not found');
-
-    // Nếu danh sách bạn bè rỗng
-    if (!sender.friend_id || sender.friend_id.length === 0) {
-      return [];
-    }
-
-    // Trả về toàn bộ thông tin bạn bè
-    return this.userModel
-      .find({
-        _id: { $in: sender.friend_id },
-      })
-      .exec();
   }
 }

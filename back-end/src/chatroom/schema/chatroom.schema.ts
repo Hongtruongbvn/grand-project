@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Types } from 'mongoose';
+import { HydratedDocument, Types } from 'mongoose';
 
 @Schema({ timestamps: true })
 export class Chatroom {
@@ -15,6 +15,12 @@ export class Chatroom {
     default: 'private',
   })
   type: 'public' | 'private' | 'group';
+
+  // === THÊM TRƯỜNG QUAN TRỌNG NÀY VÀO ===
+  // Lưu danh sách ID của tất cả thành viên trong phòng chat
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'User' }], default: [] })
+  members: Types.ObjectId[];
 }
 
+export type ChatroomDocument = HydratedDocument<Chatroom>;
 export const ChatroomSchema = SchemaFactory.createForClass(Chatroom);

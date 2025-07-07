@@ -1,16 +1,21 @@
-import { IsString, IsNotEmpty, IsMongoId, IsArray } from 'class-validator';
+import { IsString, IsNotEmpty, IsMongoId, IsArray, IsOptional } from 'class-validator';
 
 export class CreateGroupRoleDto {
   @IsString()
-  @IsNotEmpty({message:"lên là bắt buộc mặc định là member"})
+  @IsNotEmpty({ message: "Tên vai trò là bắt buộc" })
   name: string;
 
   @IsArray()
-  access: string[];
+  @IsOptional()
+  access?: string[];
 
+  // === SỬA LỖI Ở ĐÂY: Thêm @IsOptional() ===
+  // Vai trò chung (global) như 'owner' sẽ không có group_id
   @IsMongoId()
-  group_id: string;
+  @IsOptional()
+  group_id?: string;
 
   @IsString()
-  color: string;
+  @IsOptional()
+  color?: string;
 }

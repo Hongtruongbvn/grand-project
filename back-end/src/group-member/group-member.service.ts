@@ -1,112 +1,86 @@
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
-import { CreateGroupMemberDto } from './dto/create-group-member.dto';
-import { UpdateGroupMemberDto } from './dto/update-group-member.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { GroupMember } from './schema/group-member.schema';
-import { Model } from 'mongoose';
-import { Types } from 'mongoose';
+import { GroupMember, GroupMemberDocument } from './schema/group-member.schema';
+import { Model, Types } from 'mongoose';
+import { User, UserDocument } from 'src/user/schema/user.schema';
 
 @Injectable()
 export class GroupMemberService {
   constructor(
-    @InjectModel(GroupMember.name) private memberModel: Model<GroupMember>,
+    @InjectModel(GroupMember.name) private memberModel: Model<GroupMemberDocument>,
   ) {}
-  async RequestJoin(
-    name: string,
-    group_id: string,
-    user_id: string,
-    group_role_id: string,
-  ) {
-    const existing = await this.memberModel.findOne({
-      group_id: new Types.ObjectId(group_id),
-      user_id: new Types.ObjectId(user_id),
-    });
 
-    if (existing) {
-      throw new ConflictException('You already requested or joined this group');
-    }
-
-    const newMember = new this.memberModel({
-      name,
-      group_id: new Types.ObjectId(group_id),
-      user_id: new Types.ObjectId(user_id),
-      group_role_id: new Types.ObjectId(group_role_id),
-      isActive: false,
+  // === SỬA LỖI Ở ĐÂY: Nhận vào `user: UserDocument` ===
+  async addOwner(groupId: string, user: UserDocument, ownerRoleId: string) {
+    const ownerMember = new this.memberModel({
+      name: user.username,
+      group_id: new Types.ObjectId(groupId),
+      user_id: user._id, // Giờ đây TypeScript sẽ hiểu user._id
+      group_role_id: new Types.ObjectId(ownerRoleId),
+      isActive: true,
       joinedAt: new Date(),
     });
-
-    return await newMember.save();
+    return await ownerMember.save();
   }
-  async isMember(user_id: string, group_id: string) {
-    const member = await this.memberModel
-      .findOne({
-        user_id: new Types.ObjectId(user_id),
-        group_id: new Types.ObjectId(group_id),
+
+  // === SỬA LỖI Ở ĐÂY: Nhận vào `user: UserDocument` ===
+  async createJoinRequest(groupId: string, user: UserDocument, memberRoleId: string) {
+    const newMemberRequest = new this.memberModel({
+      name: user.username,
+      group_id: new Types.ObjectId(groupId),
+      user_id: user._id, // Giờ đây TypeScript sẽ hiểu user._id
+      group_role_id: new Types.ObjectId(memberRoleId),
+      isActive: false,
+    });
+    return await newMemberRequest.save();
+  }
+
+  async findPendingMember(userId: string, groupId: string): Promise<GroupMemberDocument | null> {
+    return this.memberModel.findOne({
+      user_id: new Types.ObjectId(userId),
+      group_id: new Types.ObjectId(groupId),
+      isActive: false,
+    }).exec();
+  }
+
+  async findPendingMembersForGroup(groupId: string): Promise<GroupMemberDocument[]> {
+    return this.memberModel
+      .find({
+        group_id: new Types.ObjectId(groupId),
+        isActive: false,
       })
+      .populate('user_id', 'username avatar')
       .exec();
-
-    return member;
   }
-  async updateMemberRole(
-    userId: string,
-    groupId: string,
-    groupRoleId: string,
-  ): Promise<void> {
+
+  // === THÊM LẠI HÀM BỊ THIẾU ===
+  // Đổi tên findMember thành isMember để khớp với lời gọi từ GroupRoleService
+  async isMember(user_id: string, group_id: string): Promise<GroupMemberDocument | null> {
+    return this.memberModel.findOne({
+      user_id: new Types.ObjectId(user_id),
+      group_id: new Types.ObjectId(group_id),
+    }).exec();
+  }
+  
+  // === THÊM LẠI HÀM BỊ THIẾU ===
+  async updateMemberRole(userId: string, groupId: string, groupRoleId: string): Promise<void> {
     const updated = await this.memberModel.findOneAndUpdate(
       {
         user_id: new Types.ObjectId(userId),
         group_id: new Types.ObjectId(groupId),
       },
-      {
-        group_role_id: new Types.ObjectId(groupRoleId),
-      },
+      { group_role_id: new Types.ObjectId(groupRoleId) },
       { new: true },
     );
-
     if (!updated) {
-      throw new NotFoundException('Group member not found');
+      throw new NotFoundException('Không tìm thấy thành viên nhóm.');
     }
   }
-  async findMemberById(userid: string, groupId: string) {
-    const member = await this.memberModel
-      .findOne({
-        user_id: new Types.ObjectId(userid),
-        group_id: new Types.ObjectId(groupId),
-      })
-      .exec();
 
-    if (!member) {
-      throw new NotFoundException('Member not found in this group');
-    }
-    return member;
-  }
-  async Delete(id: string): Promise<void> {
-    const result = await this.memberModel.deleteOne({ _id: id });
+  async deleteById(id: string): Promise<void> {
+    const result = await this.memberModel.deleteOne({ _id: new Types.ObjectId(id) });
     if (result.deletedCount === 0) {
-      throw new NotFoundException('Group member not found');
+      throw new NotFoundException('Không tìm thấy bản ghi thành viên để xóa.');
     }
-  }
-  async DeleteByUserIdAndGroupId(
-    userId: string,
-    groupId: string,
-  ): Promise<void> {
-    const result = await this.memberModel.deleteOne({
-      user_id: new Types.ObjectId(userId),
-      group_id: new Types.ObjectId(groupId),
-    });
-    if (result.deletedCount === 0) {
-      throw new NotFoundException('Group member not found');
-    }
-  }
-  async findById(id: string): Promise<GroupMember | null> {
-    const member = await this.memberModel.findOne({ user_id: id }).exec();
-    if (!member) {
-      throw new NotFoundException('Group member not found');
-    }
-    return member;
   }
 }

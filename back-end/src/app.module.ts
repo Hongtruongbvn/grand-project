@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -16,24 +16,18 @@ import { TypeModule } from './type/type.module';
 import { InterestModule } from './interest/interest.module';
 import { ConfigModule } from '@nestjs/config';
 import { GroupModule } from './group/group.module';
-import { SearchModule } from './search/search.module'; // Nam thêm
+import { SearchModule } from './search/search.module';
 import { GroupRoleModule } from './group-role/group-role.module';
 import { GroupMemberModule } from './group-member/group-member.module';
 import { NotificationModule } from './notification/notification.module';
 import { ChatroomMemberModule } from './chatroom-member/chatroom-member.module';
-import { FriendRequestModule } from './friend-request/friend-request.module';
-import { VideoCallModule } from './video-call/video-call.module';
-import { VideoGateway } from './video-call/video.gateway';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
-
+    ConfigModule.forRoot({ isGlobal: true }),
     MongooseModule.forRoot(process.env.MONGOOSE as string),
-    VideoCallModule,
-    UserModule,
+    forwardRef(() => UserModule),
     AuthModule,
     PostsModule,
     CommentModule,
@@ -43,18 +37,17 @@ import { VideoGateway } from './video-call/video.gateway';
     BlockModule,
     StoryModule,
     MessageModule,
-    ChatroomModule,
+    forwardRef(() => ChatroomModule),
     GlobalRoleModule,
     GroupModule,
     GroupRoleModule,
     GroupMemberModule,
     NotificationModule,
-    ChatroomMemberModule,
-    SearchModule, // Nam thêm
-    FriendRequestModule,
-    VideoCallModule,
+    forwardRef(() => ChatroomMemberModule),
+    SearchModule,
+    ChatModule,
   ],
   controllers: [AppController],
-  providers: [AppService, VideoGateway],
+  providers: [AppService],
 })
 export class AppModule {}

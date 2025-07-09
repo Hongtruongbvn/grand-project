@@ -16,12 +16,9 @@ import { TypeModule } from 'src/type/type.module';
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
-    // Dùng forwardRef cho các module có khả năng phụ thuộc ngược lại
     forwardRef(() => ChatroomModule),
     forwardRef(() => GroupModule),
     forwardRef(() => TypeModule),
-
-    // Các module khác mà UserService cần
     GlobalRoleModule,
     InterestModule,
     MailModule,

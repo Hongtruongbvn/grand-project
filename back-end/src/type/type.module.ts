@@ -13,5 +13,6 @@ import { UserModule } from 'src/user/user.module';
   ],
   controllers: [TypeController],
   providers: [TypeService],
+  exports: [TypeService],
 })
 export class TypeModule {}

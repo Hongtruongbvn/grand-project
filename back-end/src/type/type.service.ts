@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, forwardRef, Inject, Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
 
 import { InjectModel } from '@nestjs/mongoose';
@@ -9,6 +9,7 @@ import { UserService } from 'src/user/user.service';
 export class TypeService {
   constructor(
     @InjectModel(Type.name) private readonly typeModel: Model<Type>,
+    @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
   ) {}
   async createType(name: string, price: number): Promise<Type> {

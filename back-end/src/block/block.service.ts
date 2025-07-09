@@ -24,4 +24,18 @@ export class BlockService {
       userId,
     );
   }
+  async blockList(userId: string) {
+    const blocked = await this.blockModel.find({ user_id: userId });
+    return blocked;
+  }
+  async isInBlockList(userId: string, senderId: string): Promise<boolean> {
+    const blocked = await this.blockModel
+      .findOne({
+        user_id: userId,
+        blocked_id: senderId,
+      })
+      .exec();
+
+    return !!blocked;
+  }
 }

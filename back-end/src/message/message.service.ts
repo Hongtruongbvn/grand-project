@@ -11,21 +11,30 @@ import { Message, MessageDocument } from './schema/message.schema';
 import { Types, Model } from 'mongoose';
 import { NotificationService } from 'src/notification/notification.service';
 import { ChatroomService } from 'src/chatroom/chatroom.service';
+import { BlockService } from 'src/block/block.service';
 
 @Injectable()
 export class MessageService {
   constructor(
-    @InjectModel(Message.name) private readonly messageModel: Model<MessageDocument>,
+    @InjectModel(Message.name)
+    private readonly messageModel: Model<MessageDocument>,
     private readonly notificationService: NotificationService,
     private readonly chatroomService: ChatroomService,
+    private readonly blockService: BlockService,
   ) {}
 
   /**
    * === HÀM SENDMESSAGE ĐÃ ĐƯỢC SỬA LỖI HOÀN CHỈNH ===
    */
-  async sendMessage(senderId: string, roomId: string, content: string): Promise<MessageDocument> {
+  async sendMessage(
+    senderId: string,
+    roomId: string,
+    content: string,
+  ): Promise<MessageDocument> {
     if (!Types.ObjectId.isValid(senderId) || !Types.ObjectId.isValid(roomId)) {
-      throw new BadRequestException('ID người dùng hoặc ID phòng chat không hợp lệ');
+      throw new BadRequestException(
+        'ID người dùng hoặc ID phòng chat không hợp lệ',
+      );
     }
 
     // === SỬA LỖI Ở ĐÂY: Gọi đúng hàm findById ===
@@ -34,13 +43,26 @@ export class MessageService {
     if (!room) {
       throw new NotFoundException('Không tìm thấy phòng chat.');
     }
-
     const senderObjectId = new Types.ObjectId(senderId);
-
-    // Kiểm tra xem người gửi có phải là thành viên của phòng chat không
-    const isMember = room.members.some(memberId => memberId.equals(senderObjectId));
+    const isBlocked = await this.blockService.isInBlockList(
+      room.owner.toString(),
+      senderId,
+    );
+    if (isBlocked) {
+      const blocked = await this.notificationService.createNoTi(
+        'bạn đã bị người dùng náy chặn',
+        room.owner.toString(),
+        senderId,
+      );
+      throw new ForbiddenException('Bạn đã bị block. Không thể gửi tin nhắn.');
+    }
+    const isMember = room.members.some((memberId) =>
+      memberId.equals(senderObjectId),
+    );
     if (!isMember) {
-      throw new ForbiddenException('Bạn không phải là thành viên của phòng chat này.');
+      throw new ForbiddenException(
+        'Bạn không phải là thành viên của phòng chat này.',
+      );
     }
 
     // Tạo và lưu tin nhắn
@@ -49,16 +71,18 @@ export class MessageService {
       room_id: new Types.ObjectId(roomId),
       sender_id: senderObjectId,
     });
-    
+
     // Populate thông tin người gửi để gửi qua socket
     const populatedMessage = await message.populate({
       path: 'sender_id',
-      select: 'username avatar'
+      select: 'username avatar',
     });
 
     // Gửi thông báo đến các thành viên khác trong phòng
-    const recipients = room.members.filter(memberId => !memberId.equals(senderObjectId));
-    
+    const recipients = room.members.filter(
+      (memberId) => !memberId.equals(senderObjectId),
+    );
+
     await Promise.all(
       recipients.map((toUserId) =>
         this.notificationService.createNoTi(
@@ -72,7 +96,7 @@ export class MessageService {
     return populatedMessage;
   }
 
-    async getMessages(roomId: string): Promise<MessageDocument[]> {
+  async getMessages(roomId: string): Promise<MessageDocument[]> {
     return this.messageModel
       .find({ room_id: new Types.ObjectId(roomId) })
       .populate('sender_id', 'username avatar')

@@ -11,6 +11,7 @@ import { ChatroomModule } from 'src/chatroom/chatroom.module';
 import { NotificationModule } from 'src/notification/notification.module';
 import { GroupModule } from 'src/group/group.module';
 import { ChatroomMemberModule } from 'src/chatroom-member/chatroom-member.module';
+import { TypeModule } from 'src/type/type.module';
 
 @Module({
   imports: [
@@ -18,6 +19,8 @@ import { ChatroomMemberModule } from 'src/chatroom-member/chatroom-member.module
     // Dùng forwardRef cho các module có khả năng phụ thuộc ngược lại
     forwardRef(() => ChatroomModule),
     forwardRef(() => GroupModule),
+    forwardRef(() => TypeModule),
+
     // Các module khác mà UserService cần
     GlobalRoleModule,
     InterestModule,

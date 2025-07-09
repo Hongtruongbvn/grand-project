@@ -8,7 +8,6 @@ import { PostsModule } from './post/post.module';
 import { CommentModule } from './comment/comment.module';
 import { ReportModule } from './report/report.module';
 import { BlockModule } from './block/block.module';
-import { StoryModule } from './story/story.module';
 import { MessageModule } from './message/message.module';
 import { ChatroomModule } from './chatroom/chatroom.module';
 import { GlobalRoleModule } from './global-role/global-role.module';
@@ -35,7 +34,6 @@ import { ChatModule } from './chat/chat.module';
     InterestModule,
     ReportModule,
     BlockModule,
-    StoryModule,
     MessageModule,
     forwardRef(() => ChatroomModule),
     GlobalRoleModule,

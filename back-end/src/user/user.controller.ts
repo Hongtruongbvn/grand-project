@@ -8,11 +8,8 @@ import {
   Get,
   Patch,
   BadRequestException,
-  HttpException,
-  HttpStatus,
   Query,
   Param,
-  NotFoundException,
   Req,
   Delete,
 } from '@nestjs/common';
@@ -77,7 +74,7 @@ export class UserController {
   async getAllFriends(@Req() req: any) {
     return this.userService.getAllFriends(req.user.userId);
   }
-  
+
   @UseGuards(JwtAuthGuard)
   @Get('friend/requests/pending')
   async getPendingRequests(@Req() req: any) {
@@ -121,7 +118,7 @@ export class UserController {
     const currentUserId = req.user.userId;
     return this.userService.removeFriend(currentUserId, friendId);
   }
-  
+
   // =======================================================
   // ==           CÁC ROUTE CẬP NHẬT THÔNG TIN           ==
   // =======================================================
@@ -129,7 +126,10 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @Patch('me/update')
   async updateMyProfile(@Req() req: any, @Body() updateDto: UpdateUserDto) {
-    const user = await this.userService.updateProfile(req.user.userId, updateDto);
+    const user = await this.userService.updateProfile(
+      req.user.userId,
+      updateDto,
+    );
     return { message: 'Cập nhật hồ sơ thành công', data: user };
   }
 
@@ -142,10 +142,13 @@ export class UserController {
     );
     return { message: 'Cập nhật sở thích thành công', data: result };
   }
-  
+
   @UseGuards(JwtAuthGuard)
   @Post('email/request-change')
-  async requestEmailChange(@Req() req: any, @Body('newEmail') newEmail: string) {
+  async requestEmailChange(
+    @Req() req: any,
+    @Body('newEmail') newEmail: string,
+  ) {
     return this.userService.requestEmailChange(req.user.userId, newEmail);
   }
 

@@ -17,6 +17,7 @@ import { MailService } from 'src/mail/mail.service';
 import { ChatroomService } from 'src/chatroom/chatroom.service';
 import { ChatroomMemberService } from 'src/chatroom-member/chatroom-member.service';
 import { NotificationService } from 'src/notification/notification.service';
+import { TypeService } from 'src/type/type.service';
 
 @Injectable()
 export class UserService {
@@ -29,6 +30,7 @@ export class UserService {
     private readonly chatroomService: ChatroomService,
     private readonly chatmemberService: ChatroomMemberService,
     private readonly notiService: NotificationService,
+    private readonly typeService: TypeService,
   ) {}
 
   async register(createUserDto: CreateUserDto): Promise<User> {
@@ -40,6 +42,7 @@ export class UserService {
       });
       const savedUser = await createdUser.save();
       await this.setDefaultRole(savedUser._id.toString());
+      await this.assignUser(savedUser._id.toString());
       return savedUser;
     } catch (error) {
       if (error.code === 11000) {
@@ -60,7 +63,9 @@ export class UserService {
       .select('-password')
       .exec();
     if (!user) {
-      throw new NotFoundException(`Không tìm thấy người dùng với ID: ${userId}`);
+      throw new NotFoundException(
+        `Không tìm thấy người dùng với ID: ${userId}`,
+      );
     }
     return user;
   }
@@ -77,7 +82,11 @@ export class UserService {
       .exec();
   }
 
-  async updateResetPasswordOtp(email: string, otp: string | null, expiry: Date | null) {
+  async updateResetPasswordOtp(
+    email: string,
+    otp: string | null,
+    expiry: Date | null,
+  ) {
     return this.userModel.updateOne(
       { email },
       { resetPasswordOtp: otp, resetPasswordOtpExpiry: expiry },
@@ -96,7 +105,10 @@ export class UserService {
     );
   }
 
-  async getFriendshipStatus(currentUserId: string, otherUserId: string): Promise<{ status: string }> {
+  async getFriendshipStatus(
+    currentUserId: string,
+    otherUserId: string,
+  ): Promise<{ status: string }> {
     const currentUser = await this.userModel.findById(currentUserId);
     const otherUser = await this.userModel.findById(otherUserId);
 
@@ -116,9 +128,14 @@ export class UserService {
     return { status: 'not_friends' };
   }
 
-  async sendFriendRequest(fromUserId: string, toUserId: string): Promise<{ message: string }> {
+  async sendFriendRequest(
+    fromUserId: string,
+    toUserId: string,
+  ): Promise<{ message: string }> {
     if (fromUserId === toUserId) {
-      throw new BadRequestException('Bạn không thể gửi lời mời cho chính mình.');
+      throw new BadRequestException(
+        'Bạn không thể gửi lời mời cho chính mình.',
+      );
     }
 
     const toUser = await this.userModel.findById(toUserId);
@@ -148,7 +165,10 @@ export class UserService {
     return { message: 'Đã gửi lời mời kết bạn thành công' };
   }
 
-  async acceptFriendRequest(currentUserId: string, requesterId: string): Promise<{ message: string }> {
+  async acceptFriendRequest(
+    currentUserId: string,
+    requesterId: string,
+  ): Promise<{ message: string }> {
     const currentUser = await this.userModel.findById(currentUserId);
     const requester = await this.userModel.findById(requesterId);
 
@@ -158,30 +178,38 @@ export class UserService {
 
     const requesterObjectId = new Types.ObjectId(requesterId);
 
-    if (!currentUser.acceptFriend.some(id => id.equals(requesterObjectId))) {
-      throw new BadRequestException('Không tìm thấy lời mời kết bạn từ người này.');
+    if (!currentUser.acceptFriend.some((id) => id.equals(requesterObjectId))) {
+      throw new BadRequestException(
+        'Không tìm thấy lời mời kết bạn từ người này.',
+      );
     }
 
     currentUser.acceptFriend = currentUser.acceptFriend.filter(
       (id) => !id.equals(requesterObjectId),
     );
 
-    if (!currentUser.friend_id.some(id => id.equals(requesterObjectId))) {
+    if (!currentUser.friend_id.some((id) => id.equals(requesterObjectId))) {
       currentUser.friend_id.push(requesterObjectId);
     }
-    if (!requester.friend_id.some(id => id.equals(currentUser._id))) {
+    if (!requester.friend_id.some((id) => id.equals(currentUser._id))) {
       requester.friend_id.push(currentUser._id as Types.ObjectId);
     }
 
     await currentUser.save();
     await requester.save();
 
-    await this.chatroomService.findOrCreatePrivateChat(currentUserId, requesterId);
+    await this.chatroomService.findOrCreatePrivateChat(
+      currentUserId,
+      requesterId,
+    );
 
     return { message: 'Chấp nhận lời mời kết bạn thành công' };
   }
 
-  async rejectFriendRequest(currentUserId: string, requesterId: string): Promise<{ message: string }> {
+  async rejectFriendRequest(
+    currentUserId: string,
+    requesterId: string,
+  ): Promise<{ message: string }> {
     const currentUser = await this.userModel.findById(currentUserId);
     if (!currentUser) {
       throw new NotFoundException('Không tìm thấy người dùng hiện tại');
@@ -193,8 +221,10 @@ export class UserService {
       (id) => id.toString() !== requesterId,
     );
 
-    if(currentUser.acceptFriend.length === initialRequestCount) {
-        throw new NotFoundException('Không tìm thấy lời mời kết bạn từ người này.');
+    if (currentUser.acceptFriend.length === initialRequestCount) {
+      throw new NotFoundException(
+        'Không tìm thấy lời mời kết bạn từ người này.',
+      );
     }
 
     await currentUser.save();
@@ -225,7 +255,10 @@ export class UserService {
     return user.friend_id as unknown as User[];
   }
 
-  async removeFriend(currentUserId: string, friendId: string): Promise<{ message: string }> {
+  async removeFriend(
+    currentUserId: string,
+    friendId: string,
+  ): Promise<{ message: string }> {
     const currentUser = await this.userModel.findById(currentUserId);
     const friendUser = await this.userModel.findById(friendId);
 
@@ -236,8 +269,12 @@ export class UserService {
     const friendObjectId = new Types.ObjectId(friendId);
     const currentUserObjectId = new Types.ObjectId(currentUserId);
 
-    currentUser.friend_id = currentUser.friend_id.filter((id) => !id.equals(friendObjectId));
-    friendUser.friend_id = friendUser.friend_id.filter((id) => !id.equals(currentUserObjectId));
+    currentUser.friend_id = currentUser.friend_id.filter(
+      (id) => !id.equals(friendObjectId),
+    );
+    friendUser.friend_id = friendUser.friend_id.filter(
+      (id) => !id.equals(currentUserObjectId),
+    );
 
     await currentUser.save();
     await friendUser.save();
@@ -261,6 +298,17 @@ export class UserService {
       { $set: { global_role_id: role._id } },
     );
   }
+  async assignUser(userId: string) {
+    const type = await this.typeService.findName('user');
+    if (!type) {
+      console.error('Vai trò "user" mặc định không tồn tại.');
+      return;
+    }
+    return this.userModel.updateOne(
+      { _id: userId },
+      { $set: { type_id: type._id } },
+    );
+  }
 
   async addInterestsToUser(userId: string, interestIds: string[]) {
     const validInterests = await this.interestService.findByIds(interestIds);
@@ -269,11 +317,16 @@ export class UserService {
     }
     return this.userModel.updateOne(
       { _id: userId },
-      { $set: { interest_id: interestIds.map(id => new Types.ObjectId(id)) } },
+      {
+        $set: { interest_id: interestIds.map((id) => new Types.ObjectId(id)) },
+      },
     );
   }
 
-  async requestEmailChange(userId: string, newEmail: string): Promise<{ message: string }> {
+  async requestEmailChange(
+    userId: string,
+    newEmail: string,
+  ): Promise<{ message: string }> {
     const user = await this.userModel.findById(userId);
     if (!user) throw new BadRequestException('Người dùng không tồn tại');
 
@@ -298,7 +351,10 @@ export class UserService {
     return { message: 'OTP xác nhận đã gửi đến email hiện tại' };
   }
 
-  async confirmEmailChange(userId: string, otp: string): Promise<{ message: string }> {
+  async confirmEmailChange(
+    userId: string,
+    otp: string,
+  ): Promise<{ message: string }> {
     const user = await this.userModel.findById(userId);
     if (
       !user ||

@@ -18,11 +18,6 @@ export class Message {
 
   @Prop({ type: Boolean, default: false }) // <-- THÊM DÒNG NÀY
   read: boolean;
-  @Prop()
-  mediaUrl?: string; // đường dẫn ảnh hoặc video
-
-  @Prop({ enum: ['image', 'video', 'none'], default: 'none' })
-  mediaType: 'image' | 'video' | 'none';
 }
 
 export type MessageDocument = HydratedDocument<Message>;

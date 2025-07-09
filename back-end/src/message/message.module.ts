@@ -6,9 +6,11 @@ import { Message, MessageSchema } from './schema/message.schema';
 import { ChatroomMemberModule } from 'src/chatroom-member/chatroom-member.module';
 import { NotificationModule } from 'src/notification/notification.module';
 import { ChatroomModule } from 'src/chatroom/chatroom.module';
+import { BlockModule } from 'src/block/block.module';
 
 @Module({
   imports: [
+    BlockModule,
     ChatroomModule,
     NotificationModule,
     ChatroomMemberModule,

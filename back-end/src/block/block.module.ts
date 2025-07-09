@@ -14,5 +14,6 @@ import { Block, BlockSchema } from './schema/block.schema';
   ],
   controllers: [BlockController],
   providers: [BlockService],
+  exports: [BlockService],
 })
 export class BlockModule {}

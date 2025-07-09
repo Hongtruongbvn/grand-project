@@ -15,8 +15,7 @@ import { ChatroomService } from 'src/chatroom/chatroom.service';
 @Injectable()
 export class MessageService {
   constructor(
-    @InjectModel(Message.name)
-    private readonly messageModel: Model<MessageDocument>,
+    @InjectModel(Message.name) private readonly messageModel: Model<MessageDocument>,
     private readonly notificationService: NotificationService,
     private readonly chatroomService: ChatroomService,
   ) {}
@@ -24,15 +23,9 @@ export class MessageService {
   /**
    * === HÀM SENDMESSAGE ĐÃ ĐƯỢC SỬA LỖI HOÀN CHỈNH ===
    */
-  async sendMessage(
-    senderId: string,
-    roomId: string,
-    content: string,
-  ): Promise<MessageDocument> {
+  async sendMessage(senderId: string, roomId: string, content: string): Promise<MessageDocument> {
     if (!Types.ObjectId.isValid(senderId) || !Types.ObjectId.isValid(roomId)) {
-      throw new BadRequestException(
-        'ID người dùng hoặc ID phòng chat không hợp lệ',
-      );
+      throw new BadRequestException('ID người dùng hoặc ID phòng chat không hợp lệ');
     }
 
     // === SỬA LỖI Ở ĐÂY: Gọi đúng hàm findById ===
@@ -45,13 +38,9 @@ export class MessageService {
     const senderObjectId = new Types.ObjectId(senderId);
 
     // Kiểm tra xem người gửi có phải là thành viên của phòng chat không
-    const isMember = room.members.some((memberId) =>
-      memberId.equals(senderObjectId),
-    );
+    const isMember = room.members.some(memberId => memberId.equals(senderObjectId));
     if (!isMember) {
-      throw new ForbiddenException(
-        'Bạn không phải là thành viên của phòng chat này.',
-      );
+      throw new ForbiddenException('Bạn không phải là thành viên của phòng chat này.');
     }
 
     // Tạo và lưu tin nhắn
@@ -60,18 +49,16 @@ export class MessageService {
       room_id: new Types.ObjectId(roomId),
       sender_id: senderObjectId,
     });
-
+    
     // Populate thông tin người gửi để gửi qua socket
     const populatedMessage = await message.populate({
       path: 'sender_id',
-      select: 'username avatar',
+      select: 'username avatar'
     });
 
     // Gửi thông báo đến các thành viên khác trong phòng
-    const recipients = room.members.filter(
-      (memberId) => !memberId.equals(senderObjectId),
-    );
-
+    const recipients = room.members.filter(memberId => !memberId.equals(senderObjectId));
+    
     await Promise.all(
       recipients.map((toUserId) =>
         this.notificationService.createNoTi(
@@ -85,28 +72,11 @@ export class MessageService {
     return populatedMessage;
   }
 
-  async getMessages(roomId: string): Promise<MessageDocument[]> {
+    async getMessages(roomId: string): Promise<MessageDocument[]> {
     return this.messageModel
       .find({ room_id: new Types.ObjectId(roomId) })
       .populate('sender_id', 'username avatar')
       .sort({ createdAt: 'asc' }) // Sắp xếp từ cũ đến mới
       .exec();
-  }
-  async createMessage(data: {
-    chatroomId: string;
-    senderId: string;
-    content?: string;
-    mediaUrl?: string;
-    mediaType?: 'image' | 'video' | 'none';
-  }) {
-    const message = new this.messageModel({
-      chatroomId: data.chatroomId,
-      senderId: data.senderId,
-      content: data.content || '',
-      mediaUrl: data.mediaUrl,
-      mediaType: data.mediaType || 'none',
-    });
-
-    return message.save();
   }
 }

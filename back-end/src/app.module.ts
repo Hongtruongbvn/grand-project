@@ -4,7 +4,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
-import { PostsModule } from './post/post.module';
+import { PostsModule } from './posts/post.module'; 
 import { CommentModule } from './comment/comment.module';
 import { ReportModule } from './report/report.module';
 import { BlockModule } from './block/block.module';
@@ -20,7 +20,10 @@ import { GroupRoleModule } from './group-role/group-role.module';
 import { GroupMemberModule } from './group-member/group-member.module';
 import { NotificationModule } from './notification/notification.module';
 import { ChatroomMemberModule } from './chatroom-member/chatroom-member.module';
-import { ChatModule } from './chat/chat.module';
+import { FriendRequestModule } from './friend-request/friend-request.module';
+import { UploadsModule } from './uploads/upload.module';
+import { GroupPostModule } from './group-post/group-post.module';
+// import { ChatModule } from './chat/chat.module'; 
 
 @Module({
   imports: [
@@ -43,9 +46,14 @@ import { ChatModule } from './chat/chat.module';
     NotificationModule,
     forwardRef(() => ChatroomMemberModule),
     SearchModule,
-    ChatModule,
+    FriendRequestModule,
+    UploadsModule,
+    GroupPostModule,
+    // ChatModule, 
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
+
+

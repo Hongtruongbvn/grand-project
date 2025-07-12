@@ -1,249 +1,139 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { Group } from './schema/group.schema';
+import { Group, GroupDocument } from './schema/group.schema';
 import { Model, Types } from 'mongoose';
-import { UserService } from 'src/user/user.service';
 import { GroupMemberService } from 'src/group-member/group-member.service';
 import { NotificationService } from 'src/notification/notification.service';
 import { GroupRoleService } from 'src/group-role/group-role.service';
 import { ChatroomService } from 'src/chatroom/chatroom.service';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class GroupService {
   constructor(
-    @InjectModel(Group.name) private groupModel: Model<Group>,
-    private readonly userService: UserService,
+    @InjectModel(Group.name) private groupModel: Model<GroupDocument>,
     private readonly groupMemService: GroupMemberService,
     private readonly notificationService: NotificationService,
     private readonly groupRoleService: GroupRoleService,
     private readonly chatRoomService: ChatroomService,
+    private readonly userService: UserService,
   ) {}
 
-  async create(
-    createGroupDto: CreateGroupDto,
-    ownerId: string,
-  ): Promise<Group> {
-    const ownerObjectId = new Types.ObjectId(ownerId); //nam thêm
-    const created = new this.groupModel({
+  async create(createGroupDto: CreateGroupDto, ownerId: string): Promise<Group> {
+    const owner = await this.userService.findById(ownerId);
+    if (!owner) throw new NotFoundException('Không tìm thấy người dùng chủ sở hữu.');
+
+    const createdGroup = new this.groupModel({
       ...createGroupDto,
-      owner: ownerObjectId, // Nam sửa
-      members: [ownerObjectId], // Nam thêm
+      owner: owner._id, // Không còn lỗi
+      members: [owner._id], // Không còn lỗi
     });
-    await this.chatRoomService.createFriendChat(created.name, ownerId, 'group');
-    return created.save();
-  }
-
-  async addInterestToGroup(
-    groupId: string,
-    interestId: string,
-  ): Promise<Group> {
-    const group = await this.groupModel.findById(groupId);
-    if (!group) throw new NotFoundException('Group not found');
-
-    const interestObjId = new Types.ObjectId(interestId);
-    if (!group.interest_id.includes(interestObjId)) {
-      group.interest_id.push(interestObjId);
-    }
-
-    return group.save();
-  }
-
-  // ===== THÊM HÀM MỚI NÀY VÀO ===== Nam thêm
-  async findAll(): Promise<Group[]> {
-    // .populate('owner', 'username') sẽ lấy cả thông tin username của người tạo nhóm
-    return this.groupModel.find().populate('owner', 'username').exec();
-  }
-  async addMemberToGroup(
-    sender_id: string,
-    receiver_id: string,
-    groupId: string,
-  ) {
-    const sender = await this.userService.findById(sender_id);
-    const receiver = await this.userService.findById(receiver_id);
-    if (!sender || !receiver) {
-      throw new NotFoundException('Sender or receiver not found');
-    }
-    const group = await this.groupModel.findById(groupId);
-    if (!group) {
-      throw new NotFoundException('Group not found');
-    }
-    const notification = await this.notificationService.createNoTi(
-      'add group request',
-      receiver_id,
-      sender_id,
+    const savedGroup = await createdGroup.save();
+    
+    const ownerRole = await this.groupRoleService.findName('owner');
+    if (!ownerRole) throw new NotFoundException('Vai trò "owner" không tồn tại.');
+    
+    await this.groupMemService.addOwner(savedGroup._id.toString(), owner, ownerRole._id.toString());
+        await this.chatRoomService.createChatroom(
+      savedGroup.name,
+      ownerId,
+      'group',
+      [ownerId] // Thành viên ban đầu chỉ có chủ nhóm
     );
-    const role = await this.groupRoleService.findName('member');
-    if (!role) {
-      throw new NotFoundException('Role not found');
-    }
-    const id = role._id as Types.ObjectId;
-    const groupMember = await this.groupMemService.RequestJoin(
-      receiver.username,
-      groupId,
-      receiver_id,
-      id.toString(),
-    );
+    
+    return savedGroup;
   }
 
-  // ===== THÊM HÀM NÀY VÀO ===== Nam thêm
+  // ... các hàm khác giữ nguyên ...
   async findById(id: string): Promise<Group> {
     const group = await this.groupModel
-      .findById(id)
-      .populate('owner members', 'username avatar')
-      .exec();
-    if (!group) {
-      throw new NotFoundException('Group not found');
-    }
+        .findById(id)
+        .populate('owner', 'username avatar')
+        .populate('members', 'username avatar')
+        .exec();
+    if (!group) throw new NotFoundException('Không tìm thấy nhóm');
     return group;
   }
 
-  async isJoined(userId: string, groupId: string): Promise<boolean> {
-    const member = await this.groupMemService.isMember(userId, groupId);
-    return !!member;
+  async findAll(): Promise<Group[]> {
+    return this.groupModel.find().populate('owner', 'username').exec();
   }
-  async aproveJoinRequest(userId: string, groupId: string) {
-    const member = await this.groupMemService.findMemberById(userId, groupId);
-    if (!member) {
-      throw new NotFoundException('Member not found');
-    }
-    member.isActive = true;
-    member.joinedAt = new Date();
+
+  async requestToJoin(groupId: string, userId: string): Promise<{ message: string }> {
     const group = await this.groupModel.findById(groupId);
-    if (!group) {
-      throw new NotFoundException('Group not found');
-    }
-    group.members = Array.from(
-      new Set([
-        ...group.members.map((id) => id.toString()),
-        member.user_id.toString(), // hoặc member._id nếu bạn dùng memberId làm đại diện
-      ]),
-    ).map((id) => new Types.ObjectId(id));
-
-    // Lưu lại group đã cập nhật
-    await group.save();
-    return member.save();
-  }
-  async rejectJoinRequest(
-    userId: string,
-    groupId: string,
-  ): Promise<{ message: string }> {
-    const member = await this.groupMemService.findMemberById(userId, groupId);
-    if (!member) {
-      throw new NotFoundException('Join request not found');
-    }
-    const isJoined = await this.isJoined(userId, groupId);
-    if (isJoined) {
-      throw new NotFoundException('You are already a member of this group');
-    }
-    await this.groupMemService.Delete(member._id.toString());
-
-    return { message: 'Join request rejected and deleted successfully' };
-  }
-
-  async findByName(name: string): Promise<Group> {
-    const group = await this.groupModel.findOne({ name }).exec();
-    if (!group) {
-      throw new NotFoundException('Group not found');
-    }
-    return group;
-  }
-  async createRquestJoin(user_id: string, group_id: string) {
-    const group = await this.groupModel.findById(group_id);
-    if (!group) {
-      throw new NotFoundException('Group not found');
-    }
-    const user = await this.userService.findById(user_id);
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-    const notification = await this.notificationService.createNoTi(
-      'new join request',
-      group.owner.toString(),
-      user_id,
-    );
-    const role = await this.groupRoleService.findName('member');
-    if (!role) {
-      throw new NotFoundException('Role not found');
-    }
-    const receiver = await this.userService.findById(user_id);
-    const id = role._id as Types.ObjectId;
-    const groupMember = await this.groupMemService.RequestJoin(
-      receiver.username,
-      group_id,
-      user_id,
-      id.toString(),
-    );
-  }
-  async actJoinRequest(user_id: string, group_id: string, sender_id: string) {
-    const group = await this.groupModel.findById(group_id);
-    if (!group) {
-      throw new NotFoundException('Group not found');
-    }
-    if (group.owner.toString() == user_id) {
-      const member = await this.groupMemService.isMember(sender_id, group_id);
-      if (!member) {
-        throw new NotFoundException('Member not found in this group');
-      }
-      member.isActive = true;
-      member.joinedAt = new Date();
-      const group = await this.groupModel.findById(group_id);
-      if (!group) {
-        throw new NotFoundException('Group not found');
-      }
-      group.members = Array.from(
-        new Set([
-          ...group.members.map((id) => id.toString()),
-          member.user_id.toString(),
-        ]),
-      ).map((id) => new Types.ObjectId(id));
-
-      await group.save();
-      return member.save();
-    } else {
-      throw new NotFoundException('You are not the owner of this group');
-    }
-  }
-  async rejectJoinRequestNyOwner(
-    user_id: string,
-    group_id: string,
-    sender_id: string,
-  ) {
-    const group = await this.groupModel.findById(group_id);
-    if (!group) {
-      throw new NotFoundException('Group not found');
-    }
-    if (group.owner.toString() == user_id) {
-      const member = await this.groupMemService.isMember(sender_id, group_id);
-      if (!member) {
-        throw new NotFoundException('Member not found in this group');
-      }
-      await this.groupMemService.DeleteByUserIdAndGroupId(sender_id, group_id);
-      return { message: 'Join request rejected and deleted successfully' };
-    } else {
-      throw new NotFoundException('You are not the owner of this group');
-    }
-  }
-
-    async suggestGroupsForUser(userId: string): Promise<Group[]> {
-    if (!Types.ObjectId.isValid(userId)) {
-    throw new BadRequestException('ID người dùng không hợp lệ');
-  }
+    if (!group) throw new NotFoundException('Không tìm thấy nhóm.');
 
     const user = await this.userService.findById(userId);
-    if (!user) throw new NotFoundException('User not found');
+    if (!user) throw new NotFoundException('Không tìm thấy người dùng.');
 
-    const suggestedGroups = await this.groupModel
-    .find({
-      interest_id: { $in: user.interest_id },
-    })
-    .populate('owner', 'username avatar')
-    .populate('channels', '_id name')
-    .populate('interest_id', 'name')
-    .exec();
+    const existingMember = await this.groupMemService.isMember(userId, groupId);
+    if (existingMember) {
+        throw new BadRequestException(existingMember.isActive ? 'Bạn đã là thành viên của nhóm này.' : 'Bạn đã gửi yêu cầu tham gia trước đó.');
+    }
 
+    const memberRole = await this.groupRoleService.findName('member');
+    if (!memberRole) throw new NotFoundException('Vai trò "member" không tồn tại.');
 
-    return suggestedGroups;
+    await this.groupMemService.createJoinRequest(groupId, user, memberRole._id.toString());
+
+    await this.notificationService.createNoTi(
+        `${user.username} đã xin vào nhóm "${group.name}".`,
+        group.owner.toString(),
+        userId,
+    );
+
+    return { message: 'Đã gửi yêu cầu tham gia nhóm thành công.' };
+  }
+  
+  async getPendingMembers(groupId: string, ownerId: string): Promise<any> {
+    const group = await this.groupModel.findById(groupId);
+    if (!group) throw new NotFoundException('Không tìm thấy nhóm.');
+    if (group.owner.toString() !== ownerId) {
+      throw new ForbiddenException('Bạn không có quyền xem danh sách này.');
+    }
+    return this.groupMemService.findPendingMembersForGroup(groupId);
   }
 
+  async processJoinRequest(
+    groupId: string,
+    ownerId: string,
+    targetUserId: string,
+    action: 'accept' | 'reject',
+  ): Promise<{ message: string }> {
+    const group = await this.groupModel.findById(groupId);
+    if (!group) throw new NotFoundException('Không tìm thấy nhóm.');
+    if (group.owner.toString() !== ownerId) {
+      throw new ForbiddenException('Bạn không có quyền thực hiện hành động này.');
+    }
+    
+    const memberRequest = await this.groupMemService.findPendingMember(targetUserId, groupId);
+    if (!memberRequest) {
+      throw new NotFoundException('Không tìm thấy yêu cầu tham gia từ người dùng này.');
+    }
+
+    if (action === 'accept') {
+      memberRequest.isActive = true;
+      memberRequest.joinedAt = new Date();
+      await memberRequest.save();
+
+      group.members.push(new Types.ObjectId(targetUserId));
+      await group.save();
+      
+      await this.notificationService.createNoTi(
+        `Yêu cầu tham gia nhóm "${group.name}" của bạn đã được chấp nhận.`,
+        targetUserId,
+        ownerId,
+      );
+      return { message: 'Đã chấp nhận thành viên mới.' };
+    } else {
+      await this.groupMemService.deleteById(memberRequest._id.toString());
+      return { message: 'Đã từ chối yêu cầu tham gia.' };
+    }
+  }
 }

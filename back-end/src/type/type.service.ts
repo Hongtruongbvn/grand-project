@@ -1,26 +1,36 @@
-import { Injectable } from '@nestjs/common';
-import { CreateTypeDto } from './dto/create-type.dto';
-import { UpdateTypeDto } from './dto/update-type.dto';
+import { BadRequestException, forwardRef, Inject, Injectable } from '@nestjs/common';
+import { Model } from 'mongoose';
+
+import { InjectModel } from '@nestjs/mongoose';
+import { Type } from './schema/type.schema';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class TypeService {
-  create(createTypeDto: CreateTypeDto) {
-    return 'This action adds a new type';
+  constructor(
+    @InjectModel(Type.name) private readonly typeModel: Model<Type>,
+    @Inject(forwardRef(() => UserService))
+    private readonly userService: UserService,
+  ) {}
+  async createType(name: string, price: number): Promise<Type> {
+    const type = new this.typeModel({ name, price });
+    return await type.save();
   }
-
-  findAll() {
-    return `This action returns all type`;
+  async findName(name: string) {
+    const find = await this.typeModel.findOne({ name }).exec();
+    return find;
   }
-
-  findOne(id: number) {
-    return `This action returns a #${id} type`;
+  async assignUser(user_id: string) {
+    const user = await this.userService.findById(user_id);
+    if (!user) {
+      throw new BadRequestException('user not found');
+      return;
+    }
+    const type = await this.findName('user');
+    if (!type) {
+      throw new BadRequestException('type not found');
+      return;
+    }
   }
-
-  update(id: number, updateTypeDto: UpdateTypeDto) {
-    return `This action updates a #${id} type`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} type`;
-  }
+  
 }

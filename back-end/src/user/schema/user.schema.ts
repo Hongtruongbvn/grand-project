@@ -1,9 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import { HydratedDocument, Types } from 'mongoose';
 
 @Schema({ timestamps: true })
-export class User extends Document {
-  @Prop({ required: true })
+export class User {
+  @Prop({ required: true, unique: true })
   username: string;
 
   @Prop()
@@ -36,21 +36,20 @@ export class User extends Document {
   @Prop({ default: false })
   hideProfile: boolean;
 
-  @Prop({ type: Types.ObjectId, ref: 'Notification' })
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'Notification' }] })
   notification: Types.ObjectId[];
 
-  @Prop({ type: Types.ObjectId, ref: 'Type' })
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'Type' }] })
   type_id: Types.ObjectId[];
 
-  @Prop({ type: [Types.ObjectId], ref: 'Interest', default: [] }) //sửa cho hiện nhiều sở thích thay vì 1
+  @Prop({ type: [Types.ObjectId], ref: 'Interest', default: [] })
   interest_id: Types.ObjectId[];
 
-  @Prop({ type: [Types.ObjectId], ref: 'User', default: [] })
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'User' }], default: [] })
   friend_id: Types.ObjectId[];
 
-
-  @Prop()
-  acceptFriend: string[];
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'User' }], default: [] })
+  acceptFriend: Types.ObjectId[];
 
   @Prop({ required: true, enum: ['male', 'female', 'other'] })
   gender: string;
@@ -65,4 +64,5 @@ export class User extends Document {
   pendingNewEmail?: string;
 }
 
+export type UserDocument = HydratedDocument<User>;
 export const UserSchema = SchemaFactory.createForClass(User);

@@ -6,18 +6,17 @@ import {
   ChatroomMember,
   ChatroomMemberSchema,
 } from './schema/chatroom-member.schema';
-import { UserModule } from 'src/user/user.module';
 import { ChatroomModule } from 'src/chatroom/chatroom.module';
 import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
   imports: [
-    forwardRef(() => UserModule),
-    NotificationModule,
-    ChatroomModule,
     MongooseModule.forFeature([
       { name: ChatroomMember.name, schema: ChatroomMemberSchema },
     ]),
+    NotificationModule,
+    // === SỬA LỖI: Dùng forwardRef() ===
+    forwardRef(() => ChatroomModule),
   ],
   controllers: [ChatroomMemberController],
   providers: [ChatroomMemberService],

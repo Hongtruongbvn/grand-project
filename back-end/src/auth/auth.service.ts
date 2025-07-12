@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { User } from 'src/user/schema/user.schema';
+import { User, UserDocument } from 'src/user/schema/user.schema'; // Import UserDocument
 import * as bcrypt from 'bcrypt';
 import { MailService } from 'src/mail/mail.service';
 import { UserService } from 'src/user/user.service';
@@ -13,39 +13,37 @@ export class AuthService {
     private userService: UserService,
     private mailService: MailService,
     private jwtService: JwtService,
-    @InjectModel(User.name) private userModel: Model<User>,
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
   ) {}
 
-  async validateUser(email: string, pass: string): Promise<any> {
-    const user = await this.userModel
-      .findOne({ email })
-      .populate('interest_id'); // 👈 THÊM DÒNG NÀY
-
+  async validateUser(email: string, pass: string): Promise<UserDocument | null> {
+    const user = await this.userModel.findOne({ email }).populate('interest_id').exec();
     if (user && (await bcrypt.compare(pass, user.password))) {
-      const { password, ...result } = user.toObject();
-      return result;
+      return user;
     }
     return null;
   }
 
-  async login(user: any) {
+  async login(user: UserDocument) {
     const payload = {
-      sub: user._id.toString(),
+      sub: user._id,
       username: user.username,
       role: user.global_role_id,
+      userId: user._id, // Thêm userId vào payload để khớp với code cũ của bạn
     };
 
     return {
       access_token: this.jwtService.sign(payload),
       user: {
-        id: user._id,
+        _id: user._id.toString(), // Trả về _id
         username: user.username,
         email: user.email,
         role: user.global_role_id,
-        interests: user.interest_id ?? [],
+        interest_id: user.interest_id ?? [],
       },
     };
   }
+
   async sendResetOtp(email: string) {
     const user = await this.userService.findByEmail(email);
     if (!user) throw new BadRequestException('Email không tồn tại');
@@ -54,19 +52,19 @@ export class AuthService {
     const expiry = new Date(Date.now() + 15 * 60 * 1000);
 
     await this.userService.updateResetPasswordOtp(email, otp, expiry);
-
     const subject = 'Mã xác nhận đặt lại mật khẩu';
     const text = `Mã OTP của bạn là: ${otp}. Mã có hiệu lực trong 15 phút.`;
-
     await this.mailService.sendMail(email, subject, text);
 
     return { message: 'Mã OTP đã được gửi đến email' };
   }
-
+  
+  // ... các hàm khác giữ nguyên ...
   async verifyOtpAndGenerateToken(email: string, otp: string) {
     const user = await this.userService.findByEmail(email);
     if (
       !user ||
+      !user.resetPasswordOtp ||
       user.resetPasswordOtp !== otp ||
       !user.resetPasswordOtpExpiry ||
       user.resetPasswordOtpExpiry < new Date()
@@ -99,8 +97,6 @@ export class AuthService {
     }
 
     await this.userService.updatePassword(email, newPassword);
-    await this.userService.updateResetPasswordOtp(email, null, null);
-
     return { message: 'Đổi mật khẩu thành công' };
   }
 }

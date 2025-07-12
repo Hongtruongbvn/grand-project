@@ -1,3 +1,4 @@
+// back-end/src/user/user.module.ts
 import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserController } from './user.controller';
@@ -5,22 +6,27 @@ import { UserService } from './user.service';
 import { User, UserSchema } from './schema/user.schema';
 import { GlobalRoleModule } from 'src/global-role/global-role.module';
 import { InterestModule } from 'src/interest/interest.module';
-import { MailService } from 'src/mail/mail.service';
+import { MailModule } from 'src/mail/mail.module';
 import { ChatroomModule } from 'src/chatroom/chatroom.module';
-import { ChatroomMemberModule } from 'src/chatroom-member/chatroom-member.module';
 import { NotificationModule } from 'src/notification/notification.module';
+import { GroupModule } from 'src/group/group.module';
+import { ChatroomMemberModule } from 'src/chatroom-member/chatroom-member.module';
+import { TypeModule } from 'src/type/type.module';
 
 @Module({
   imports: [
-    NotificationModule,
-    forwardRef(() => ChatroomMemberModule), // 👈 fix vòng lặp ở đây
-    ChatroomModule,
+    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    forwardRef(() => ChatroomModule),
+    forwardRef(() => GroupModule),
+    forwardRef(() => TypeModule),
     GlobalRoleModule,
     InterestModule,
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    MailModule,
+    NotificationModule,
+    ChatroomMemberModule,
   ],
   controllers: [UserController],
-  providers: [UserService, MailService],
-  exports: [MongooseModule, UserService],
+  providers: [UserService],
+  exports: [UserService],
 })
 export class UserModule {}

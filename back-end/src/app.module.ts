@@ -4,7 +4,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
-import { PostsModule } from './posts/post.module'; // ✅ Giữ từ quan1
+import { PostsModule } from './posts/post.module'; 
 import { CommentModule } from './comment/comment.module';
 import { ReportModule } from './report/report.module';
 import { BlockModule } from './block/block.module';
@@ -49,10 +49,11 @@ import { GroupPostModule } from './group-post/group-post.module';
     FriendRequestModule,
     UploadsModule,
     GroupPostModule,
-    // ChatModule,
+    // ChatModule, 
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
+
 

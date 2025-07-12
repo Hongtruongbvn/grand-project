@@ -1,3 +1,5 @@
+// back-end/src/user/user.controller.ts
+
 import {
   Body,
   Controller,
@@ -5,13 +7,9 @@ import {
   UseGuards,
   Get,
   Patch,
-  Request,
   BadRequestException,
-  HttpException,
-  HttpStatus,
   Query,
   Param,
-  NotFoundException, //nam thêm
   Req,
   Delete,
 } from '@nestjs/common';
@@ -25,6 +23,10 @@ import { Types } from 'mongoose';
 export class UserController {
   constructor(private userService: UserService) {}
 
+  // =======================================================
+  // ==        ROUTES KHÔNG CẦN AUTH (đặt lên trên)       ==
+  // =======================================================
+
   @Post('register')
   async register(@Body() dto: CreateUserDto) {
     try {
@@ -36,16 +38,94 @@ export class UserController {
     }
   }
 
+  // =======================================================
+  // ==    CÁC ROUTE CỤ THỂ (ưu tiên trước route chung)   ==
+  // =======================================================
+
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  async getMyProfile(@Request() req) {
+  async getMyProfile(@Req() req: any) {
     const user = await this.userService.findById(req.user.userId);
+    // Hàm findById đã có sẵn check not found
     return { message: 'Lấy thông tin người dùng thành công', data: user };
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('search')
+  async searchUsers(@Query('q') query: string) {
+    if (!query) {
+      throw new BadRequestException('Cần cung cấp từ khóa tìm kiếm.');
+    }
+    return this.userService.searchByName(query);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('status/:otherUserId')
+  async getFriendshipStatus(
+    @Req() req: any,
+    @Param('otherUserId') otherUserId: string,
+  ) {
+    const currentUserId = req.user.userId;
+    return this.userService.getFriendshipStatus(currentUserId, otherUserId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('friend/list')
+  async getAllFriends(@Req() req: any) {
+    return this.userService.getAllFriends(req.user.userId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('friend/requests/pending')
+  async getPendingRequests(@Req() req: any) {
+    const currentUserId = req.user.userId;
+    return this.userService.getPendingRequests(currentUserId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('friend/request/:toUserId')
+  async sendFriendRequest(
+    @Param('toUserId') toUserId: string,
+    @Req() req: any,
+  ) {
+    const fromUserId = req.user.userId;
+    return this.userService.sendFriendRequest(fromUserId, toUserId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('friend/accept/:requesterId')
+  async acceptFriendRequest(
+    @Param('requesterId') requesterId: string,
+    @Req() req: any,
+  ) {
+    const currentUserId = req.user.userId;
+    return this.userService.acceptFriendRequest(currentUserId, requesterId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('friend/reject/:requesterId')
+  async rejectFriendRequest(
+    @Param('requesterId') requesterId: string,
+    @Req() req: any,
+  ) {
+    const currentUserId = req.user.userId;
+    return this.userService.rejectFriendRequest(currentUserId, requesterId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('friend/remove/:friendId')
+  async removeFriend(@Param('friendId') friendId: string, @Req() req: any) {
+    const currentUserId = req.user.userId;
+    return this.userService.removeFriend(currentUserId, friendId);
+  }
+
+  // =======================================================
+  // ==           CÁC ROUTE CẬP NHẬT THÔNG TIN           ==
+  // =======================================================
+
+  @UseGuards(JwtAuthGuard)
   @Patch('me/update')
-  async updateMyProfile(@Request() req, @Body() updateDto: UpdateUserDto) {
+  async updateMyProfile(@Req() req: any, @Body() updateDto: UpdateUserDto) {
     const user = await this.userService.updateProfile(
       req.user.userId,
       updateDto,
@@ -54,124 +134,42 @@ export class UserController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post('set/role/user')
-  async setUserRole(@Request() req) {
-    const result = await this.userService.setDefaultRole(req.user.userId);
-    return { message: 'Gán vai trò thành công', data: result };
-  }
-  @UseGuards(JwtAuthGuard)
   @Post('set/interests')
-  async setInterests(
-    @Request() req: any,
-    @Body() dto: { interestIds: string[] },
-  ) {
+  async setInterests(@Req() req: any, @Body() dto: { interestIds: string[] }) {
     const result = await this.userService.addInterestsToUser(
       req.user.userId,
       dto.interestIds,
     );
     return { message: 'Cập nhật sở thích thành công', data: result };
   }
-  @Get('find/email')
-  async getUserByEmail(@Query('email') email: string) {
-    if (!email) {
-      throw new HttpException('Email is required', HttpStatus.BAD_REQUEST);
-    }
-    return this.userService.findByEmail(email);
-  }
-  @Get('find/gender/:gender')
-  async getUsersByGender(@Param('gender') gender: string) {
-    if (!['male', 'female', 'other'].includes(gender)) {
-      throw new HttpException('Invalid gender value', HttpStatus.BAD_REQUEST);
-    }
-    return this.userService.findByGender(gender as 'male' | 'female' | 'other');
-  }
-  @Get('find/interest') //http:localhost:9090/users/find/interest?ids=665fc03109cc9925f82473a1,665fc03109cc9925f82473a2,665fc03109cc9925f82473a3
-  async getUsersByInterest(@Query('ids') ids: string) {
-    if (!ids) {
-      throw new HttpException(
-        'hãy thử users/find/interest?ids=665fc03109cc9925f82473a1,665fc03109cc9925f82473a2,',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    const idArray = ids.split(',').filter((id) => Types.ObjectId.isValid(id));
-    if (idArray.length === 0) {
-      throw new HttpException(
-        'No valid interest IDs provided',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    return this.userService.findByInterestIds(
-      idArray.map((id) => new Types.ObjectId(id)),
-    );
-  }
-  @UseGuards(JwtAuthGuard)
-  @Post('friend/request/:toUserId')
-  async sendFriendRequest(
-    @Param('toUserId') toUserId: string,
-    @Request() req: any,
-  ) {
-    const fromUserId = req.user.userId; // 👈 lấy userId hiện tại từ token
-    return this.userService.sendFriendRequest(fromUserId, toUserId);
-  }
-  @UseGuards(JwtAuthGuard)
-  @Post('friend/accept/:requesterId')
-  async acceptFriendRequest(
-    @Param('requesterId') requesterId: string,
-    @Req() req: any,
-  ) {
-    return this.userService.acceptFriendRequest(req.user.userId, requesterId);
-  }
-  @UseGuards(JwtAuthGuard)
-  @Post('friend/reject/:requesterId')
-  async rejectFriendRequest(
-    @Param('requesterId') requesterId: string,
-    @Req() req: any,
-  ) {
-    return this.userService.rejectFriendRequest(req.user.userId, requesterId);
-  }
-  @UseGuards(JwtAuthGuard)
-  @Delete('friend/remove/:friendId')
-  async removeFriend(@Param('friendId') friendId: string, @Req() req: any) {
-    return this.userService.removeFriend(req.user.userId, friendId);
-  }
-
-  // ===== THÊM ENDPOINT MỚI NÀY VÀO ĐỂ SỬA LỖI LOGIC ===== Nam thêm
-  @UseGuards(JwtAuthGuard) // Bảo vệ endpoint này
-  @Get(':id')
-  async getUserById(@Param('id') id: string) {
-    // Kiểm tra xem ID có hợp lệ không trước khi gọi service
-    if (!Types.ObjectId.isValid(id)) {
-      throw new BadRequestException('ID người dùng không hợp lệ');
-    }
-    const user = await this.userService.findById(id);
-    if (!user) {
-      throw new NotFoundException('Không tìm thấy người dùng');
-    }
-    return { message: 'Lấy thông tin thành công', data: user };
-  }
-
-      // ===== THÊM ENDPOINT NÀY VÀO ===== Nam thêm
-    @UseGuards(JwtAuthGuard)
-    @Get('search')
-    async searchUsers(@Query('q') query: string) {
-        return this.userService.searchByName(query);
-    }
-
 
   @UseGuards(JwtAuthGuard)
   @Post('email/request-change')
-  async requestEmailChange(@Request() req, @Body('newEmail') newEmail: string) {
+  async requestEmailChange(
+    @Req() req: any,
+    @Body('newEmail') newEmail: string,
+  ) {
     return this.userService.requestEmailChange(req.user.userId, newEmail);
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('email/confirm-change')
-  async confirmEmailChange(@Request() req, @Body('otp') otp: string) {
+  async confirmEmailChange(@Req() req: any, @Body('otp') otp: string) {
     return this.userService.confirmEmailChange(req.user.userId, otp);
   }
+
+  // =======================================================
+  // ==      ROUTE CHUNG (phải đặt ở dưới cùng)         ==
+  // =======================================================
+
   @UseGuards(JwtAuthGuard)
-  @Get('Find/Friend')
-  async getAllFriends(@Request() req) {
-    return this.userService.getAllFriends(req.user.userId);
+  @Get(':id')
+  async getUserById(@Param('id') id: string) {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException('ID người dùng không hợp lệ');
+    }
+    const user = await this.userService.findById(id);
+    // Hàm findById đã có sẵn check not found, không cần check lại
+    return { message: 'Lấy thông tin thành công', data: user };
   }
 }

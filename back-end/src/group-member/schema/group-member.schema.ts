@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Schema as MongooseSchema, Types } from 'mongoose';
+import { HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose'; // Import HydratedDocument
 
 @Schema({ timestamps: true })
 export class GroupMember {
@@ -12,10 +12,7 @@ export class GroupMember {
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', required: true })
   user_id: Types.ObjectId;
 
-  @Prop({
-    type: MongooseSchema.Types.ObjectId,
-    ref: 'GroupRole',
-  })
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'GroupRole' })
   group_role_id: Types.ObjectId;
 
   @Prop({ default: false })
@@ -25,4 +22,6 @@ export class GroupMember {
   joinedAt: Date;
 }
 
+// === SỬA LỖI: Dùng HydratedDocument ===
+export type GroupMemberDocument = HydratedDocument<GroupMember>;
 export const GroupMemberSchema = SchemaFactory.createForClass(GroupMember);

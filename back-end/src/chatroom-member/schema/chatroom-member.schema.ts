@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Types } from 'mongoose';
+import { Types, HydratedDocument } from 'mongoose';
 @Schema({ timestamps: true })
 export class ChatroomMember {
   @Prop({ type: Types.ObjectId, ref: 'Chatroom', required: true })
@@ -18,6 +18,6 @@ export class ChatroomMember {
   @Prop({ default: true })
   isActive: boolean;
 }
-
+export type ChatroomMemberDocument = HydratedDocument<ChatroomMember>;
 export const ChatroomMemberSchema =
   SchemaFactory.createForClass(ChatroomMember);

@@ -7,11 +7,16 @@ import {
   UseGuards,
   Req,
   BadRequestException,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { GroupService } from './group.service';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { Types } from 'mongoose';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 
 @Controller('group')
 @UseGuards(JwtAuthGuard)
@@ -19,10 +24,28 @@ export class GroupController {
   constructor(private readonly groupService: GroupService) {}
 
   @Post()
-  async create(@Body() createGroupDto: CreateGroupDto, @Req() req: any) {
+  @UseInterceptors(
+    FileInterceptor('group_background', {
+      storage: diskStorage({
+        destination: './uploads/groups',
+        filename: (req, file, callback) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const ext = extname(file.originalname);
+          callback(null, `${file.fieldname}-${uniqueSuffix}${ext}`);
+        },
+      }),
+    }),
+  )
+  async create(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() createGroupDto: any,
+    @Req() req: any,
+  ) {
     const ownerId = req.user.userId;
-    return this.groupService.create(createGroupDto, ownerId);
+    const imagePath = file ? `/uploads/groups/${file.filename}` : '';
+    return this.groupService.create({ ...createGroupDto, group_background: imagePath }, ownerId);
   }
+
 
   @Get()
   async findAll() {

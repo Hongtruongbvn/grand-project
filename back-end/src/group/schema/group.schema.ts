@@ -17,12 +17,14 @@ export class Group {
 
   @Prop({ type: [MongooseSchema.Types.ObjectId], ref: 'Interest', default: [] })
   interest_id: Types.ObjectId[];
-  
+
   // Các trường này có thể không cần nữa vì logic đã chuyển sang GroupMember
   // Nhưng tôi giữ lại để tránh lỗi nếu bạn có dùng ở nơi khác
   @Prop({ type: [{ type: Types.ObjectId, ref: 'User' }], default: [] })
   pending_members: Types.ObjectId[];
-  
+
+  @Prop({ required: true, default: '' })
+  group_background: string;
   @Prop({ type: [MongooseSchema.Types.ObjectId], ref: 'User', default: [] })
   baned_members: Types.ObjectId[];
 }

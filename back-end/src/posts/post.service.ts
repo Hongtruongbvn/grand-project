@@ -2,6 +2,7 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreatePostDto } from './dto/create-post.dto';
+import { UpdatePostDto } from './dto/update-post.dto';
 import { Post, PostDocument } from './schema/post.schema';
 
 @Injectable()
@@ -27,11 +28,25 @@ export class PostsService {
     return this.postModel.create({ ...dto, author: userId });
   }
 
-  async update(id: string, dto: CreatePostDto, userId: string): Promise<Post | null> {
+  async update(id: string, dto: UpdatePostDto, userId: string): Promise<Post | null> {
     const post = await this.postModel.findById(id);
     if (!post || post.author.toString() !== userId.toString()) return null;
 
-    Object.assign(post, dto);
+    // Nếu truyền media mới thì xác định lại type nếu không có
+    if (!dto.type) {
+      if (dto.mediaUrls?.length && dto.shortVideo) post.type = 'mixed';
+      else if (dto.mediaUrls?.length) post.type = 'mixed';
+      else if (dto.shortVideo) post.type = 'video';
+      else post.type = 'text';
+    }
+
+    if (dto.title !== undefined) post.title = dto.title;
+    if (dto.content !== undefined) post.content = dto.content;
+    if (dto.shortVideo !== undefined) post.shortVideo = dto.shortVideo;
+    if (dto.mediaUrls !== undefined) post.mediaUrls = dto.mediaUrls;
+    if (dto.type !== undefined) post.type = dto.type;
+    if (dto.visibility !== undefined) post.visibility = dto.visibility;
+
     await post.save();
     return post;
   }

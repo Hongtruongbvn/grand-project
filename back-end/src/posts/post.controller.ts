@@ -12,6 +12,7 @@ import {
 } from '@nestjs/common';
 import { PostsService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
+import { UpdatePostDto } from './dto/update-post.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Controller('posts')
@@ -21,12 +22,13 @@ export class PostsController {
   @UseGuards(JwtAuthGuard)
   @HttpPost()
   create(@Body() dto: CreatePostDto, @Req() req) {
-    return this.postsService.create(dto, req.user.userId);
+    const userId = req.user.userId;
+    return this.postsService.create(dto, userId);
   }
 
   @UseGuards(JwtAuthGuard)
   @Put(':id')
-  async update(@Param('id') id: string, @Body() body: CreatePostDto, @Req() req) {
+  async update(@Param('id') id: string, @Body() body: UpdatePostDto, @Req() req) {
     const updated = await this.postsService.update(id, body, req.user.userId);
     if (!updated) throw new ForbiddenException('Bạn không có quyền sửa bài này');
     return updated;

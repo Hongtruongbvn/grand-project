@@ -13,6 +13,7 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { CommentService } from './comment.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
+import { ReactCommentDto } from './dto/react-comment.dto';
 
 @Controller('comments')
 export class CommentController {
@@ -39,5 +40,19 @@ export class CommentController {
   @Delete(':id')
   delete(@Param('id') id: string, @Req() req) {
     return this.commentService.delete(id, req.user.userId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/react')
+  react(
+    @Param('id') id: string,
+    @Body() dto: ReactCommentDto,
+    @Req() req,
+  ) {
+    return this.commentService.reactToComment(
+      id,
+      req.user.userId,
+      dto.type,
+    );
   }
 }

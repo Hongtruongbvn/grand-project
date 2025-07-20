@@ -17,6 +17,14 @@ export class Comment {
     
   @Prop({ default: false })
   isDeleted: boolean;
+
+  @Prop({
+  type: Map,
+  of: [{ type: Types.ObjectId, ref: 'User' }],
+  default: {},
+  })
+  reactions: Map<string, Types.ObjectId[]>;
+
 }
 
 export type CommentDocument = Comment & Document;
